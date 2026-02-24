@@ -2,3 +2,10 @@ name: SavingPrivateRahya
 version: '1.0-SNAPSHOT'
 main: com.zezdathecrystaldragon.com.savingPrivateRahya.SavingPrivateRahya
 api-version: '1.21'
+commands:
+  svp:
+    description: Starts or cancells the game.
+    usage: /svp [start|cancell]
+  setvip:
+    description: Marks the specified player as the VIP.
+    usage: /setvip [player]

@@ -17,5 +17,7 @@ public class OnPlayersDisconnect implements Listener
         UUID id = event.getPlayer().getUniqueId();
         if(game.getParticipants().containsKey(id))
             game.getParticipants().get(id).onDisconnect(event);
+        if(game.isPreGame())
+            game.removeParticipant(id);
     }
 }

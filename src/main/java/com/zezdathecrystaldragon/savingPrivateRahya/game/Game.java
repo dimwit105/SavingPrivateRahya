@@ -8,6 +8,8 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.VeryImportantPartici
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.block.data.type.Bed;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -15,46 +17,59 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class Game
 {
     HashMap<UUID, Participant> participants = new HashMap<UUID, Participant>();
     VeryImportantParticipant vip;
     GameState currentState = GameState.LOBBY;
-    TimerTask time = new TimerTask(this, 60*60);
-    TitleManager titles = new TitleManager(this);
-    public Game() {}
+    public final TimerTask time = new TimerTask(this, 60*60);
+    public final TitleManager titles = new TitleManager(this);
+    public final WorldModifier wm = new WorldModifier(this);
+    public final World overworld;
+    public final World nether;
+    public Game()
+    {
+        overworld = Bukkit.getWorlds().stream()
+                .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
+                .findFirst()
+                .orElse(Bukkit.getWorlds().getFirst());
+        nether = Bukkit.getWorlds().stream()
+                .filter(w -> w.getEnvironment() == World.Environment.NETHER)
+                .findFirst()
+                .orElse(Bukkit.getWorlds().getFirst());
+    }
 
     public void setVeryImportantParticipant(Participant participant)
     {
         this.vip = participant.toVIP();
     }
 
-    /**
-     * Adds a player as a participant to the game, if they are not already a participant.
-     * @param player the player to add as a participant
-     * @return whether or not the player was actually added to the list.
-     */
-    public boolean addParticipant(Player player)
+    public void startGame(CommandSender starter)
     {
-        if(isPreGame() && !participants.containsKey(player.getUniqueId()))
-        {
-            participants.put(player.getUniqueId(), new Participant(player.getUniqueId()));
-            return true;
-        }
-        return false;
-    }
-    public void startGame()
-    {
-        if(currentState != GameState.LOBBY)
+        if(currentState != GameState.LOBBY){
+            starter.sendMessage("The game has already started! Not in lobby state!");
+            return;}
+        if(vip == null){
+            starter.sendMessage("We need a VIP to start the game!");
+            return;}
+        if(!wm.isReady()){
+            starter.sendMessage("We are still looking for a suitable spot to place the structures! Please try again later, or check the console for long-run logs.");
             return;
+        }
+
         currentState = GameState.COUNTDOWN;
-        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(new CountdownTask(this, 20), 0, 20);
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(new CountdownTask(this, 30), 0, 20);
     }
     public void countDownFinished()
     {
         currentState = GameState.IN_PROGRESS;
         getTitles().sendTitleToOnlineOneSecond(Component.text("The game has begun!"));
+        for(Participant part : participants.values())
+        {
+            part.beginGame();
+        }
     }
 
     public void endGame(GameEndReason reason)
@@ -82,10 +97,6 @@ public class Game
         {
             currentState = GameState.LOBBY;
             clearParticipants();
-            World overworld = Bukkit.getWorlds().stream()
-                    .filter(w -> w.getEnvironment() == World.Environment.NORMAL)
-                    .findFirst()
-                    .orElse(Bukkit.getWorlds().getFirst());
 
             for(Player p : Bukkit.getOnlinePlayers())
             {
@@ -98,6 +109,26 @@ public class Game
             currentState = GameState.VICTORY;
             clearParticipants();
         }
+    }
+
+    /**
+     * Adds a player as a participant to the game, if they are not already a participant.
+     * @param player the player to add as a participant
+     * @return whether or not the player was actually added to the list.
+     */
+    public boolean addParticipant(Player player)
+    {
+        if(isPreGame() && !participants.containsKey(player.getUniqueId()))
+        {
+            participants.put(player.getUniqueId(), new Participant(player.getUniqueId()));
+            return true;
+        }
+        return false;
+    }
+
+    public Participant removeParticipant(UUID player)
+    {
+        return participants.remove(player);
     }
 
     private void clearParticipants()

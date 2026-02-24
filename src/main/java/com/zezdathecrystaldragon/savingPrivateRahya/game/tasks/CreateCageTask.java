@@ -1,6 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
 import org.bukkit.Location;
@@ -9,7 +10,7 @@ import java.util.logging.Logger;
 
 public class CreateCageTask extends CancellableRunnable {
 
-    private final World world;
+    private final Game game;
     private final Logger logger;
     private final long startTime;
     private WorldModifier wm;
@@ -18,8 +19,8 @@ public class CreateCageTask extends CancellableRunnable {
     private int totalAttempts = 0;
     private boolean found = false;
 
-    public CreateCageTask(World world, WorldModifier worldModifier) {
-        this.world = world;
+    public CreateCageTask(Game game, WorldModifier worldModifier) {
+        this.game = game;
         this.logger = SavingPrivateRahya.PLUGIN.getLogger();
         this.startTime = System.currentTimeMillis();
         this.wm = worldModifier;
@@ -31,10 +32,10 @@ public class CreateCageTask extends CancellableRunnable {
         for (int i = 0; i < 50; i++) {
             totalAttempts++;
 
-            Location loc = wm.findOneRandomLocation(world);
+            Location loc = wm.findOneRandomLocation(game.nether);
 
             if (loc != null) {
-                wm.createVIPCage(world, loc);
+                wm.createVIPCage(game.nether, loc);
 
                 long duration = (System.currentTimeMillis() - startTime) / 1000;
                 logger.info("Success! Cage created at " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ()

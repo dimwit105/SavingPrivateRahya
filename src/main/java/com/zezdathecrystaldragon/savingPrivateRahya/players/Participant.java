@@ -5,14 +5,15 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.RespawningParticipant;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -102,6 +103,26 @@ public class Participant
     {
         tasks.add(task);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(getPlayer(), task, 0, 20);
+    }
+    public void beginGame()
+    {
+        switch (spawnLocation)
+        {
+            case NETHER -> {
+                getPlayer().teleportAsync(game.wm.getCageCenter());
+                getPlayer().getInventory().clear();
+                ItemStack startingPickaxe = new ItemStack(Material.COPPER_PICKAXE);
+                startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
+                getPlayer().getInventory().addItem(startingPickaxe);
+                getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
+                getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
+                getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
+            }
+            case OVERWORLD -> {
+                getPlayer().teleportAsync(game.overworld.getSpawnLocation());
+                getPlayer().getInventory().clear();
+            }
+        }
     }
 
     public Player getPlayer()

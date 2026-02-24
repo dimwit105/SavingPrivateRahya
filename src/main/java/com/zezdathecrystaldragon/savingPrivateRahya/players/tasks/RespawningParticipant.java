@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 public class RespawningParticipant extends ParticipantTask
 {
     Player player;
-    int respawnTime = 5;
+    int respawnTime = 16;
     public RespawningParticipant(Participant participant)
     {
         super(participant);

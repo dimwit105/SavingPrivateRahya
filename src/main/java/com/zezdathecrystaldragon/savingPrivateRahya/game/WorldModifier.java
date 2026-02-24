@@ -1,25 +1,40 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game;
 
+import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.CreateCageTask;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
 public class WorldModifier
 {
-    private World nether;
+    List<Material> nonBlockers;
+    private final int cageSize = 5;
+    private boolean ready = false;
     Game game;
-    private CreateCageTask searchTask;
-    public WorldModifier(World nether, Game game)
+    Location cageCenter;
+    private final CreateCageTask cageSearchTask;
+    public WorldModifier(Game game)
     {
         this.game = game;
-        this.nether = nether;
-        searchTask = new CreateCageTask(nether, this);
+        cageSearchTask = new CreateCageTask(game, this);
+        nonBlockers.addAll(Tag.LEAVES.getValues());
+        nonBlockers.addAll(Tag.WART_BLOCKS.getValues());
+        nonBlockers.add(Material.SHROOMLIGHT);
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(cageSearchTask, 5, 1);
     }
 
     public void createVIPCage(World w, Location startCorner) {
-        int cageSize = 5;
+
         // Cast doubles to ints for block coordinates
         int x0 = startCorner.getBlockX();
         int y0 = startCorner.getBlockY();
@@ -38,8 +53,15 @@ public class WorldModifier
                     int boundaryCount = (isXBoundary ? 1 : 0) + (isYBoundary ? 1 : 0) + (isZBoundary ? 1 : 0);
 
                     Block block = w.getBlockAt(x, y, z);
-
-                    if (boundaryCount >= 2) {
+                    if (y == cageSize && boundaryCount == 1) {
+                        //Roofing, transparent, ghastproof block.
+                        block.setType(Material.WAXED_COPPER_GRATE);
+                    }
+                    else if(y == y0 && boundaryCount == 1) {
+                        //Flooring, standing on copper bars is a bad idea.
+                        block.setType(Material.BLACKSTONE);
+                    }
+                    else if (boundaryCount >= 2) {
                         // Frame/Edges
                         block.setType(Material.BLACKSTONE);
                     } else if (boundaryCount == 1) {
@@ -52,17 +74,18 @@ public class WorldModifier
                 }
             }
         }
+        ready = true;
+        cageCenter = startCorner.add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
     }
     public Location findOneRandomLocation(World nether) {
-        java.util.Random random = new java.util.Random();
+        Random random = SavingPrivateRahya.RAND;
 
         // 1. Pick a random angle
         double theta = random.nextDouble() * 2 * Math.PI;
 
         // 2. Pick a radius between 1500 and 1700
-        // To "skew" it outward, we raise the random 0.0-1.0 to a power < 1 (like 0.5)
-        // or simply use Math.max(random, random) to favor higher numbers.
-        double skew = Math.sqrt(random.nextDouble()); // Biases towards 1.0
+        double skew = random.nextDouble();
         double r = 1500 + (skew * 200);
 
         // 3. Convert Polar to Cartesian (X, Z)
@@ -75,7 +98,7 @@ public class WorldModifier
 
             if (floor.getType().isSolid() && floor.getType() != Material.LAVA) {
                 // Ensure 5x5x5 clear space above
-                if (isAreaClear(nether, x, y + 1, z, 5)) {
+                if (isAreaClear(nether, x, y + 1, z, cageSize)) {
                     // Ensure no lava directly beneath
                     if (nether.getBlockAt(x, y - 1, z).getType() != Material.LAVA) {
                         return new Location(nether, x, y, z);
@@ -95,8 +118,8 @@ public class WorldModifier
 
                     // 1. If it's air, it's definitely clear
                     if (type.isAir()) continue;
-                    // 2. Check if it's "Nether Tree Leaves"
-                    if (type == Material.WARPED_WART_BLOCK || type == Material.NETHER_WART_BLOCK || type == Material.SHROOMLIGHT) {
+                    // 2. Ignore anything thats not important enough to keep
+                    if (nonBlockers.contains(type)) {
                         continue;
                     }
                     // 3. Check for general non-colliding "clutter"
@@ -111,4 +134,6 @@ public class WorldModifier
         }
         return true;
     }
+    public Location getCageCenter() {return cageCenter;}
+    public boolean isReady() {return ready;}
 }

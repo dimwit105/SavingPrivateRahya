@@ -33,7 +33,7 @@ public class TitleManager
             currentlyShownTitle = t;
             Title.Times times = t.times();
             Duration totalTitleLength = times.fadeIn().plus(times.stay().plus(times.fadeOut()));
-            SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runLater(() -> currentlyShownTitle = null, totalTitleLength.toMillis() / Ticks.SINGLE_TICK_DURATION_MS);
+            SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runLater(() -> currentlyShownTitle = null, (totalTitleLength.toMillis() / Ticks.SINGLE_TICK_DURATION_MS)-1);
         }
 
         if(currentlyShownTitle != t)
