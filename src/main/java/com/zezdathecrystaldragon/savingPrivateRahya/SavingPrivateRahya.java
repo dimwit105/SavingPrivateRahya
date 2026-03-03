@@ -30,8 +30,8 @@ public final class SavingPrivateRahya extends JavaPlugin
     public void onEnable()
     {
         PLUGIN = this;
-        GAME = new Game();
         foliaLib = new FoliaLib(this);
+        GAME = new Game();
         new EventManager();
     }
 
