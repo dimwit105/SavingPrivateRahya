@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class OnPlayersDisconnect implements Listener
 {
-    Game game = SavingPrivateRahya.GAME;
+    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerDisconnect(PlayerQuitEvent event)
     {

@@ -10,13 +10,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class OnPlayerPortal implements Listener
 {
-    Game game = SavingPrivateRahya.GAME;
+    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event)
     {

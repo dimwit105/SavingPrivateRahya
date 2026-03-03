@@ -10,6 +10,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -28,6 +29,7 @@ public class VeryImportantParticipant extends Participant
      * @param location Either Nether for VIP spawning, or Overworld for regular spawning.
      * @return Whether setting was successful. VIPs can only spawn in the nether, and can not have an overworld spawn.
      */
+    @Override
     public boolean electSpawn(SpawnLocation location)
     {
         if(location == SpawnLocation.NETHER)
@@ -47,12 +49,12 @@ public class VeryImportantParticipant extends Participant
         swordMeta.setMaxDamage(12);
         swordMeta.setRarity(ItemRarity.EPIC);
         swordMeta.customName(Component.text(getPlayer().getName() + "'s last resort"));
-        swordMeta.addAttributeModifier(Attribute.ATTACK_KNOCKBACK, new AttributeModifier(swordBuff, 1D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-
+        //swordMeta.addAttributeModifier(Attribute.ATTACK_KNOCKBACK, new AttributeModifier(swordBuff, 12D, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
+        swordMeta.addEnchant(Enchantment.KNOCKBACK, 10, true);
         vipSword.setItemMeta(swordMeta);
         getPlayer().getInventory().addItem(vipSword);
     }
-
+    @Override
     public void onDeath(PlayerDeathEvent event)
     {
         eliminate();

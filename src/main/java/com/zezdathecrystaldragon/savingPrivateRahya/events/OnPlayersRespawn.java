@@ -13,7 +13,7 @@ public class OnPlayersRespawn implements Listener
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event)
     {
-        Game game = SavingPrivateRahya.GAME;
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
         UUID id = event.getPlayer().getUniqueId();
 
         if(game.getParticipants().containsKey(id))

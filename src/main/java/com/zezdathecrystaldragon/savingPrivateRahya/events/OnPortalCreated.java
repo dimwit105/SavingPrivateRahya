@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class OnPortalCreated implements Listener
 {
-    int check = SavingPrivateRahya.GAME.extractionZoneTotal;
+    int check = SavingPrivateRahya.PLUGIN.getGame().extractionZoneTotal;
     @EventHandler
     public void onPortalCreated(PortalCreateEvent event) {
         if (event.getReason() != PortalCreateEvent.CreateReason.FIRE) return;
@@ -40,7 +40,7 @@ public class OnPortalCreated implements Listener
                 block.setType(Material.CRYING_OBSIDIAN);
                 block.update(true);
 
-                if (!SavingPrivateRahya.GAME.isPreGame()) {
+                if (!SavingPrivateRahya.PLUGIN.getGame().isPreGame()) {
                     block.getWorld().createExplosion(block.getLocation(), 3f, true, true);
                 }
             }

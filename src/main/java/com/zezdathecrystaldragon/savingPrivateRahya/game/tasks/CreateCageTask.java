@@ -65,6 +65,7 @@ public class CreateCageTask extends WorldTask {
             for(CompletableFuture<Location> future : batch)
             {
                 Location loc = future.join();
+                totalAttempts++;
                 if(loc != null)
                 {
                     winner = loc;
@@ -84,7 +85,6 @@ public class CreateCageTask extends WorldTask {
                 }
                 else
                 {
-                    totalAttempts+=BATCHSIZE;
                     searching = false;
                 }
             });

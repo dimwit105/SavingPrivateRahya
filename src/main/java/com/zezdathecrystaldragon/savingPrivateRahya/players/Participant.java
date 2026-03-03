@@ -6,6 +6,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.RespawningParticipant;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -21,7 +22,7 @@ import java.util.UUID;
 
 public class Participant
 {
-    Game game = SavingPrivateRahya.GAME;
+    Game game;
     final UUID playerID;
     ArrayList<ParticipantTask> tasks = new ArrayList<ParticipantTask>();
     SpawnLocation spawnLocation;
@@ -32,9 +33,10 @@ public class Participant
     {
         return new VeryImportantParticipant(this);
     }
-    public Participant(UUID playerID)
+    public Participant(UUID playerID, Game game)
     {
         this.playerID = playerID;
+        this.game = game;
         spawnLocation = SpawnLocation.OVERWORLD;
     }
 
@@ -46,7 +48,7 @@ public class Participant
         this.eliminationLocation = other.eliminationLocation;
         this.respawning = other.respawning;
         this.game = other.game;
-        this.tasks = other.tasks;
+        this.tasks = new ArrayList<>(other.tasks);
     }
 
     /**
@@ -107,6 +109,8 @@ public class Participant
     }
     public void beginGame()
     {
+        getPlayer().setHealth(getPlayer().getAttribute(Attribute.MAX_HEALTH).getValue());
+        getPlayer().clearActivePotionEffects();
         switch (spawnLocation)
         {
             case NETHER -> {

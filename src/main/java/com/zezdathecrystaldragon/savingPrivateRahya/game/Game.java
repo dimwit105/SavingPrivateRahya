@@ -8,6 +8,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.VeryImportantPartici
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class Game
 {
@@ -29,11 +31,11 @@ public class Game
     public final int extractionZoneBuffer = 8;
     public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
 
-    public final int baseTime = 60*60;
+    public final int baseTime = 1*60;
 
-    public TimerTask time = new TimerTask(this, baseTime);
+    public TimerTask time;
     public final TitleManager titles = new TitleManager(this);
-    public final WorldModifier wm = new WorldModifier(this);
+    public WorldModifier wm;
     private CountdownTask countdownTask;
     public final World overworld;
     public final World nether;
@@ -53,12 +55,9 @@ public class Game
             p.teleportAsync(overworld.getSpawnLocation());
         }
         nether.getWorldBorder().setCenter(0, 0);
-        nether.getWorldBorder().changeSize(vipDistance*1.5F, 1);
-    }
-
-    public void setVeryImportantParticipant(Participant participant)
-    {
-        this.vip = participant.toVIP();
+        nether.getWorldBorder().changeSize(vipDistance*3.0F, 1);
+        wm = new WorldModifier(this);
+        time = new TimerTask(this, baseTime);
     }
 
     public Game newGame()
@@ -89,7 +88,7 @@ public class Game
         }
 
         currentState = GameState.COUNTDOWN;
-        countdownTask = new CountdownTask(this, 30);
+        countdownTask = new CountdownTask(this, 3);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(countdownTask, 0, 20);
     }
     public void countDownFinished()
@@ -108,16 +107,24 @@ public class Game
 
     public void endGame(GameEndReason reason)
     {
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Trying to end the game because " + reason.toString() + " in gamestate " + currentState.toString());
         if(currentState != GameState.IN_PROGRESS)
             return;
 
         if(reason == GameEndReason.VIP_DIED || reason == GameEndReason.TIMER_EXHAUSTED)
         {
             currentState = GameState.DEFEAT;
+            titles.sendTitleToOnlineOneSecond(Component.text("The VIP has been slain!"));
+            time.cancel();
             for(Participant p : participants.values())
             {
                 Player player = p.getPlayer();
-                if(player == null || p.isEliminated())
+                if(player == null)
+                    continue;
+
+                player.playSound(player, Sound.ITEM_GOAT_HORN_SOUND_7, 1, 1);
+
+                if(p.isEliminated())
                     continue;
                 p.eliminate();
                 long delay = SavingPrivateRahya.RAND.nextLong(100) + 50;
@@ -149,7 +156,7 @@ public class Game
     {
         if(isPreGame() && !participants.containsKey(player.getUniqueId()))
         {
-            participants.put(player.getUniqueId(), new Participant(player.getUniqueId()));
+            participants.put(player.getUniqueId(), new Participant(player.getUniqueId(), this));
             return true;
         }
         return false;

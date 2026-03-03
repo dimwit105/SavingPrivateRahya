@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class OnPlayersConnect implements Listener
 {
-    Game game = SavingPrivateRahya.GAME;
+    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {

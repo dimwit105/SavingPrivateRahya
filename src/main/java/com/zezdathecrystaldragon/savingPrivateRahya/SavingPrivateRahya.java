@@ -3,7 +3,6 @@ package com.zezdathecrystaldragon.savingPrivateRahya;
 import com.tcoded.folialib.FoliaLib;
 import com.tcoded.folialib.wrapper.task.WrappedTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.EventManager;
-import com.zezdathecrystaldragon.savingPrivateRahya.events.OnPlayersConnect;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import org.bukkit.Bukkit;
@@ -12,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,7 @@ import java.util.function.Consumer;
 
 public final class SavingPrivateRahya extends JavaPlugin
 {
-    public static Game GAME;
+    public Game game;
     public static SavingPrivateRahya PLUGIN;
     public static Random RAND = new Random();
     private FoliaLib foliaLib;
@@ -31,7 +29,7 @@ public final class SavingPrivateRahya extends JavaPlugin
     {
         PLUGIN = this;
         foliaLib = new FoliaLib(this);
-        GAME = new Game();
+        game = new Game();
         new EventManager();
     }
 
@@ -43,19 +41,22 @@ public final class SavingPrivateRahya extends JavaPlugin
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args)
     {
+        if(args.length == 0){
+            sender.sendMessage("We need some arguments bruv");
+            return false;}
         if(cmd.getName().equalsIgnoreCase("svp"))
         {
             String firstArg = args[0].toLowerCase();
             switch (firstArg)
             {
                 case "start":
-                    GAME.startGame(sender);
+                    game.startGame(sender);
                     return true;
                 case "cancel":
-                    GAME.endGame(GameEndReason.CANCELLED);
+                    game.endGame(GameEndReason.CANCELLED);
                     return true;
                 case "reset":
-                    GAME = GAME.newGame();
+                    game = game.newGame();
                     return true;
                 default:
                     return false;
@@ -65,9 +66,11 @@ public final class SavingPrivateRahya extends JavaPlugin
         {
             String playerName = args[0];
             Player newVIP = Bukkit.getPlayer(playerName);
-            if(newVIP == null)
-                return false;
-            GAME.setVeryImportantParticipant(GAME.getParticipants().get(newVIP.getUniqueId()));
+            if(newVIP == null) {
+                sender.sendMessage("I couldn't find that player");
+                return false;}
+            game.makeVIP(newVIP);
+            sender.sendMessage(playerName + " is the new VIP!");
             return true;
         }
         return false;
@@ -90,6 +93,10 @@ public final class SavingPrivateRahya extends JavaPlugin
     public FoliaLib getFoliaLib()
     {
         return foliaLib;
+    }
+    public Game getGame()
+    {
+        return game;
     }
 
     public static void runNextTick(Consumer<WrappedTask> runnable)

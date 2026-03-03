@@ -65,16 +65,30 @@ public class WorldModifier
                     } else if (boundaryCount == 1) {
                         // Flat walls/Faces
                         block.setType(Material.COPPER_BARS);
+                        if (block.getBlockData() instanceof org.bukkit.block.data.MultipleFacing bars) {
+                            for (org.bukkit.block.BlockFace face : new org.bukkit.block.BlockFace[]{
+                                    org.bukkit.block.BlockFace.NORTH, org.bukkit.block.BlockFace.SOUTH,
+                                    org.bukkit.block.BlockFace.EAST, org.bukkit.block.BlockFace.WEST
+                            }) {
+                                Block neighbor = block.getRelative(face);
+                                // Connect if the neighbor is NOT air and NOT another bar (or connect to bars too)
+                                if (!neighbor.getType().isAir()) {
+                                    bars.setFace(face, true);
+                                }
+                            }
+                            block.setBlockData(bars);
+                        }
                     } else {
                         // Interior
                         block.setType(Material.AIR);
                     }
+                    block.getState().update(true);
                 }
             }
         }
         ready = true;
         cageCenter = startCorner.clone().add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
+        //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
     }
     public Location getCageCenter() {return cageCenter;}
     public boolean isReady() {return ready;}

@@ -58,7 +58,7 @@ public class TimerTask extends CancellableRunnable
         if(!revamped)
         {
             visualTimer.name(Component.text("Impending doom approaches"));
-            visualTimer.color(BossBar.Color.WHITE);
+            visualTimer.color(BossBar.Color.YELLOW);
             game.nether.getWorldBorder().changeSize(game.extractionZoneTotal, maximumOvertime * -20L);
             revamped = true;
         }
