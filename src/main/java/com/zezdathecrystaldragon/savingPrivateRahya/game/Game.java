@@ -7,6 +7,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.VeryImportantParticipant;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -67,6 +68,10 @@ public class Game
             countdownTask.cancel();
         }
         clearParticipants();
+        for(Player player : Bukkit.getOnlinePlayers())
+        {
+            player.setGameMode(GameMode.SURVIVAL);
+        }
         return new Game();
     }
 
