@@ -8,7 +8,6 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.VeryImportantPartici
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.block.data.type.Bed;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
@@ -17,16 +16,24 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class Game
 {
     HashMap<UUID, Participant> participants = new HashMap<UUID, Participant>();
     VeryImportantParticipant vip;
     GameState currentState = GameState.LOBBY;
-    public final TimerTask time = new TimerTask(this, 60*60);
+    //TODO Make magic numbers configurable
+    public final int vipDistance = 1500;
+    public final int extractionZone = 64;
+    public final int extractionZoneBuffer = 8;
+    public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
+
+    public final int baseTime = 60*60;
+
+    public TimerTask time = new TimerTask(this, baseTime);
     public final TitleManager titles = new TitleManager(this);
     public final WorldModifier wm = new WorldModifier(this);
+    private CountdownTask countdownTask;
     public final World overworld;
     public final World nether;
     public Game()
@@ -39,11 +46,28 @@ public class Game
                 .filter(w -> w.getEnvironment() == World.Environment.NETHER)
                 .findFirst()
                 .orElse(Bukkit.getWorlds().getFirst());
+        for(Player p : Bukkit.getOnlinePlayers())
+        {
+            addParticipant(p);
+            p.teleportAsync(overworld.getSpawnLocation());
+        }
+        nether.getWorldBorder().setCenter(0, 0);
+        nether.getWorldBorder().changeSize(vipDistance*1.5F, 1);
     }
 
     public void setVeryImportantParticipant(Participant participant)
     {
         this.vip = participant.toVIP();
+    }
+
+    public Game newGame()
+    {
+        time.cancel();
+        if (countdownTask != null) {
+            countdownTask.cancel();
+        }
+        clearParticipants();
+        return new Game();
     }
 
     public void startGame(CommandSender starter)
@@ -60,16 +84,21 @@ public class Game
         }
 
         currentState = GameState.COUNTDOWN;
-        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(new CountdownTask(this, 30), 0, 20);
+        countdownTask = new CountdownTask(this, 30);
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(countdownTask, 0, 20);
     }
     public void countDownFinished()
     {
+        if(currentState != GameState.COUNTDOWN)
+            return;
+
         currentState = GameState.IN_PROGRESS;
         getTitles().sendTitleToOnlineOneSecond(Component.text("The game has begun!"));
         for(Participant part : participants.values())
         {
             part.beginGame();
         }
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(time, 0, 20);
     }
 
     public void endGame(GameEndReason reason)
@@ -95,20 +124,15 @@ public class Game
         }
         if(reason == GameEndReason.CANCELLED)
         {
-            currentState = GameState.LOBBY;
+            currentState = GameState.CANCELLED;
             clearParticipants();
-
-            for(Player p : Bukkit.getOnlinePlayers())
-            {
-                addParticipant(p);
-                p.teleportAsync(overworld.getSpawnLocation());
-            }
         }
         if(reason == GameEndReason.VICTORY)
         {
             currentState = GameState.VICTORY;
             clearParticipants();
         }
+        nether.getWorldBorder().changeSize(30_000_000, 0);
     }
 
     /**

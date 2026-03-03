@@ -7,5 +7,6 @@ public enum GameState
     IN_PROGRESS,
     TIME_EXHAUSTED,
     VICTORY,
-    DEFEAT
+    DEFEAT,
+    CANCELLED
 }

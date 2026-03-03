@@ -85,6 +85,7 @@ public class Participant
         if(respawning)
         {
             respawning = false;
+            getPlayer().setGameMode(GameMode.SPECTATOR);
             getPlayer().teleportAsync(game.getVip().getPlayer().getLocation());
             addTask(new RespawningParticipant(this));
         }
@@ -109,20 +110,30 @@ public class Participant
         switch (spawnLocation)
         {
             case NETHER -> {
-                getPlayer().teleportAsync(game.wm.getCageCenter());
-                getPlayer().getInventory().clear();
-                ItemStack startingPickaxe = new ItemStack(Material.COPPER_PICKAXE);
-                startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
-                getPlayer().getInventory().addItem(startingPickaxe);
-                getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
-                getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
-                getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
+                getPlayer().teleportAsync(game.wm.getCageCenter()).thenAccept(tpd -> {
+                    if(tpd)
+                    {
+                        getPlayer().getInventory().clear();
+                        giveStartingGear();
+                    }
+                });
+
             }
             case OVERWORLD -> {
-                getPlayer().teleportAsync(game.overworld.getSpawnLocation());
-                getPlayer().getInventory().clear();
+                getPlayer().teleportAsync(game.overworld.getSpawnLocation()).thenAccept(tpd -> {
+                    getPlayer().getInventory().clear();
+                });
             }
         }
+    }
+    protected void giveStartingGear()
+    {
+        ItemStack startingPickaxe = new ItemStack(Material.COPPER_PICKAXE);
+        startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
+        getPlayer().getInventory().addItem(startingPickaxe);
+        getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
+        getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
+        getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
     }
 
     public Player getPlayer()

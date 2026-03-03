@@ -35,10 +35,10 @@ public class VeryImportantParticipant extends Participant
         return false;
     }
 
-    public void beginGame()
+    @Override
+    protected void giveStartingGear()
     {
-        super.beginGame();
-
+        super.giveStartingGear();
         getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
 
         NamespacedKey swordBuff = new NamespacedKey(SavingPrivateRahya.PLUGIN, "vipswordbuff");

@@ -12,5 +12,7 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnPlayersDeath(), spr);
         Bukkit.getPluginManager().registerEvents(new OnPlayersDisconnect(), spr);
         Bukkit.getPluginManager().registerEvents(new OnPlayersRespawn(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnPortalCreated(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnPlayerPortal(), spr);
     }
 }

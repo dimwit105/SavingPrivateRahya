@@ -2,15 +2,11 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarFlag;
-import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.Player;
 
 public class TimerTask extends CancellableRunnable
@@ -18,6 +14,7 @@ public class TimerTask extends CancellableRunnable
     Game game;
     int secondsRemaining;
     int secondsMaximum;
+    int maximumOvertime;
     public static final NamespacedKey TIMER_BAR = new NamespacedKey(SavingPrivateRahya.PLUGIN, "timer_bar");
     final Component name = Component.text("Nether Stability");
     BossBar visualTimer;
@@ -28,13 +25,26 @@ public class TimerTask extends CancellableRunnable
         this.game = game;
         this.secondsRemaining = seconds;
         this.secondsMaximum = seconds;
+        this.maximumOvertime = (int) Math.floor(seconds * -0.5D);
         visualTimer = BossBar.bossBar(name, 1.0F, BossBar.Color.WHITE, BossBar.Overlay.NOTCHED_6);
         sendBossBars();
     }
 
     @Override
+    public void cancel()
+    {
+        super.cancel();
+        SavingPrivateRahya.PLUGIN.getServer().hideBossBar(visualTimer);
+    }
+
+    @Override
     public void run()
     {
+        if(secondsRemaining <= maximumOvertime)
+        {
+            game.endGame(GameEndReason.TIMER_EXHAUSTED);
+        }
+
         secondsRemaining--;
         if(secondsRemaining >= 0)
             visualTimer.progress((float) secondsRemaining /(float) secondsMaximum);
@@ -44,11 +54,12 @@ public class TimerTask extends CancellableRunnable
 
     private void revampTimer()
     {
-        visualTimer.progress(Math.abs(secondsRemaining) / (secondsMaximum * 0.5F));
+        visualTimer.progress((float) Math.abs(secondsRemaining) / (Math.abs(maximumOvertime)));
         if(!revamped)
         {
             visualTimer.name(Component.text("Impending doom approaches"));
             visualTimer.color(BossBar.Color.WHITE);
+            game.nether.getWorldBorder().changeSize(game.extractionZoneTotal, maximumOvertime * -20L);
             revamped = true;
         }
 
@@ -62,13 +73,7 @@ public class TimerTask extends CancellableRunnable
 
     private void sendBossBars()
     {
-        for (Participant p : game.getParticipants().values())
-        {
-            Player player = p.getPlayer();
-            if(player == null)
-                continue;
-            player.showBossBar(visualTimer);
-        }
+        SavingPrivateRahya.PLUGIN.getServer().showBossBar(visualTimer);
     }
     public void onPlayerConnect(Player player)
     {

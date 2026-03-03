@@ -1,6 +1,6 @@
 name: SavingPrivateRahya
 version: '1.0-SNAPSHOT'
-main: com.zezdathecrystaldragon.com.savingPrivateRahya.SavingPrivateRahya
+main: com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya
 api-version: '1.21'
 commands:
   svp:

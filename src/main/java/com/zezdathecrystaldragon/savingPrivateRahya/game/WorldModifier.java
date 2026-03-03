@@ -23,7 +23,7 @@ public class WorldModifier
     public WorldModifier(Game game)
     {
         this.game = game;
-        cageSearchTask = new CreateCageTask(game, this, cageSize + Math.floorDiv(Bukkit.getOnlinePlayers().size(), 5));
+        cageSearchTask = new CreateCageTask(game, this, cageSize);
         ArrayList<Material> nb = new ArrayList<>();
         nb.addAll(Tag.LEAVES.getValues());
         nb.addAll(Tag.WART_BLOCKS.getValues());
@@ -34,7 +34,6 @@ public class WorldModifier
 
     public void createVIPCage(World w, Location startCorner) {
 
-        // Cast doubles to ints for block coordinates
         int x0 = startCorner.getBlockX();
         int y0 = startCorner.getBlockY();
         int z0 = startCorner.getBlockZ();
@@ -52,7 +51,7 @@ public class WorldModifier
                     int boundaryCount = (isXBoundary ? 1 : 0) + (isYBoundary ? 1 : 0) + (isZBoundary ? 1 : 0);
 
                     Block block = w.getBlockAt(x, y, z);
-                    if (y == cageSize && boundaryCount == 1) {
+                    if (y == y0 + cageSize - 1 && boundaryCount == 1) {
                         //Roofing, transparent, ghastproof block.
                         block.setType(Material.WAXED_COPPER_GRATE);
                     }
@@ -74,7 +73,7 @@ public class WorldModifier
             }
         }
         ready = true;
-        cageCenter = startCorner.add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
+        cageCenter = startCorner.clone().add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
         SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
     }
     public Location getCageCenter() {return cageCenter;}
