@@ -1,7 +1,7 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
+package com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.WorldModifier;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,7 +30,6 @@ public abstract class WorldTask extends CancellableRunnable
 
     protected boolean isRectCuboidClear(World w, int x0, int y0, int z0, int sizeX, int sizeY, int sizeZ) {
         for (int x = x0; x < x0 + sizeX; x++) {
-            // We check the 4 layers above the floor (y0 to y0 + size - 2)
             for (int y = y0; y < y0 + sizeY; y++) {
                 for (int z = z0; z < z0 + sizeZ; z++) {
                     Block block = w.getBlockAt(x, y, z);

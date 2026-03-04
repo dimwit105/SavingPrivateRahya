@@ -1,6 +1,6 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players;
 
-import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.ParticipantTask;
@@ -22,10 +22,10 @@ import java.util.UUID;
 
 public class Participant
 {
-    Game game;
+    protected Game game;
     final UUID playerID;
     ArrayList<ParticipantTask> tasks = new ArrayList<ParticipantTask>();
-    SpawnLocation spawnLocation;
+    protected SpawnLocation spawnLocation;
     boolean eliminated = false;
     Location eliminationLocation;
     boolean respawning = false;
@@ -40,7 +40,7 @@ public class Participant
         spawnLocation = SpawnLocation.OVERWORLD;
     }
 
-    protected Participant(Participant other)
+    public Participant(Participant other)
     {
         this.playerID = other.playerID;
         this.spawnLocation = other.spawnLocation;
@@ -102,6 +102,11 @@ public class Participant
         cancelAllTasks();
     }
 
+    /**
+     * Adds a ParticipantTask to the participant. This will manage them in a list and stop them when needed.
+     * All ParticipantTask's added this way will run once every 20 ticks, starting immediately.
+     * @param task the task to add.
+     */
     public void addTask(ParticipantTask task)
     {
         tasks.add(task);

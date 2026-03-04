@@ -1,9 +1,8 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
+package com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.WorldModifier;
-import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;

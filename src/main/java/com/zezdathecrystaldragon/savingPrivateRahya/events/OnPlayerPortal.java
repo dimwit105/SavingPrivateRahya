@@ -4,7 +4,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
-import com.zezdathecrystaldragon.savingPrivateRahya.players.VeryImportantParticipant;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

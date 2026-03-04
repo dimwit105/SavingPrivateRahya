@@ -5,7 +5,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
 
 public abstract class ParticipantTask extends CancellableRunnable
 {
-    Participant participant;
+    protected Participant participant;
     protected ParticipantTask(Participant participant)
     {
         this.participant = participant;

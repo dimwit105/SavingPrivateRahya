@@ -1,27 +1,28 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.players;
+package com.zezdathecrystaldragon.savingPrivateRahya.players.vip;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.aura.VIPEffectAura;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class VeryImportantParticipant extends Participant
 {
-    VeryImportantParticipant(Participant p)
+    private final VIPEffectAura aura;
+    public VeryImportantParticipant(Participant p)
     {
         super(p);
+        this.aura = new VIPEffectAura(this);
         this.spawnLocation = SpawnLocation.NETHER;
+        aura.start();
     }
 
     /**
@@ -68,4 +69,6 @@ public class VeryImportantParticipant extends Participant
     {
         return new Participant(this);
     }
+
+    public VIPEffectAura getAura() {return aura;}
 }
