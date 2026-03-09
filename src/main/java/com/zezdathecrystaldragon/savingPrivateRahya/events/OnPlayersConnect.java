@@ -14,12 +14,19 @@ public class OnPlayersConnect implements Listener
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {
-        if(game.isPreGame() && !game.getParticipants().containsKey(event.getPlayer().getUniqueId())) {
-            game.addParticipant(event.getPlayer());
-            event.getPlayer().setGameMode(GameMode.SURVIVAL);
+        if(!game.getParticipants().containsKey(event.getPlayer().getUniqueId()))
+        {
+            if(game.isPreGame())
+            {
+                game.addParticipant(event.getPlayer());
+                event.getPlayer().setGameMode(GameMode.SPECTATOR);
+            }
+            else
+            {
+                event.getPlayer().kick(Component.text("Game is already in progress, sorry!"));
+            }
         }
-        else
-            event.getPlayer().kick(Component.text("Game is already in progress, sorry!"));
+
         game.getTime().onPlayerConnect(event.getPlayer());
     }
 }

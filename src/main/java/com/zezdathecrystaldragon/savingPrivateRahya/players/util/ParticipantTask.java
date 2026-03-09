@@ -1,7 +1,7 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.players.tasks;
+package com.zezdathecrystaldragon.savingPrivateRahya.players.util;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
-import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
 
 public abstract class ParticipantTask extends CancellableRunnable
 {

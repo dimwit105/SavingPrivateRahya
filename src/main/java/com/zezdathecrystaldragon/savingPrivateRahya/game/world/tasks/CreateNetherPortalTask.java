@@ -57,11 +57,14 @@ public class CreateNetherPortalTask extends WorldTask {
                     int y = 32 + random.nextInt(60);
                     Block floor = nether.getBlockAt(x, y, z);
 
-                    // Must be solid ground and not lava
-                    if (floor.getType().isSolid() && floor.getType() != Material.LAVA) {
-                        // Check 4x5 space for the portal
-                        if (isRectCuboidClear(nether, x, y + 1, z, 4, 5, 1)) {
-                            finalResult.complete(new Location(nether, x, y + 1, z));
+                    if (floor.getType().isSolid() && !floor.isLiquid()) {
+                        y = floor.getY() + 1;
+
+                        int widthX = (orientation == WorldModifier.PortalOrientation.X_AXIS) ? 4 : 1;
+                        int widthZ = (orientation == WorldModifier.PortalOrientation.Z_AXIS) ? 4 : 1;
+
+                        if (isRectCuboidClear(nether, x, y, z, widthX, 5, widthZ)) {
+                            finalResult.complete(new Location(nether, x, y, z));
                             return;
                         }
                     }

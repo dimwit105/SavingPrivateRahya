@@ -37,9 +37,11 @@ public class OnPortalCreated implements Listener
             event.setCancelled(true);
 
             for (BlockState block : blocks) {
-                block.setType(Material.CRYING_OBSIDIAN);
-                block.update(true);
-
+                if(block.getType().equals(Material.OBSIDIAN))
+                {
+                    block.setType(Material.CRYING_OBSIDIAN);
+                    block.update(true);
+                }
                 if (!SavingPrivateRahya.PLUGIN.getGame().isPreGame()) {
                     block.getWorld().createExplosion(block.getLocation(), 3f, true, true);
                 }

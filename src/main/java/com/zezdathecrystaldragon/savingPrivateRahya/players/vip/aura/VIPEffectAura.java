@@ -26,10 +26,5 @@ public class VIPEffectAura
         this.vip = veryImportantParticipant;
         vip.addTask(new ApplyAuraTask(vip));
     }
-    public void start()
-    {
-
-    }
-
     public int getLevel() {return level;}
 }

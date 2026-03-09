@@ -9,3 +9,9 @@ commands:
   setvip:
     description: Marks the specified player as the VIP.
     usage: /setvip [player]
+  choosespawn:
+    description: Decide where to spawn, either in the nether with VIP, or in the overworld
+    usage: /choosespawn [nether|overworld]
+  testsiege:
+    description: spawns a mob to test siege ai
+    usage: /testsiege

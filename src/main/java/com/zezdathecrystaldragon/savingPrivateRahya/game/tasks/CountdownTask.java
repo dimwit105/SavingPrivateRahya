@@ -1,7 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
 import net.kyori.adventure.text.Component;
 
 public class CountdownTask extends CancellableRunnable

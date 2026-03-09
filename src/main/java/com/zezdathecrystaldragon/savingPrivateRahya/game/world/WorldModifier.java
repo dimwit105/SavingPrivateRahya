@@ -12,6 +12,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class WorldModifier
 {
@@ -25,6 +26,7 @@ public class WorldModifier
     private boolean ready = false;
     Game game;
     Location cageCenter;
+    Location nethersidePortal;
     private final CreateCageTask cageSearchTask;
     public WorldModifier(Game game)
     {
@@ -118,7 +120,7 @@ public class WorldModifier
         }
         ready = true;
         cageCenter = startCorner.clone().add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
-        //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
     }
 
     public void buildPortal(World w, Location startCorner, PortalOrientation orientation) {
@@ -131,8 +133,14 @@ public class WorldModifier
                 if (width == 0 || width == 3 || height == 0 || height == 4) {
                     current.getBlock().setType(Material.OBSIDIAN);
                 }
+                else
+                    current.getBlock().setType(Material.AIR);
             }
         }
+        if(w.getEnvironment().equals(World.Environment.NETHER))
+            nethersidePortal = startCorner;
+
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Portal generated in the %s, at %d, %d, %d.", w.getEnvironment().toString(), startCorner.getBlockX(), startCorner.getBlockY(), startCorner.getBlockZ()));
         orientation.getRelative(startCorner, 1, 1).getBlock().setType(Material.FIRE);
     }
     public void buildPortalWithPlatform(World w, Location start, PortalOrientation orientation, boolean platform) {
@@ -158,6 +166,7 @@ public class WorldModifier
 
     public Location getCageCenter() {return cageCenter;}
     public boolean isReady() {return ready;}
+    public Location getNethersidePortal() {return nethersidePortal;}
 
     public enum PortalOrientation {
         X_AXIS(1, 0),

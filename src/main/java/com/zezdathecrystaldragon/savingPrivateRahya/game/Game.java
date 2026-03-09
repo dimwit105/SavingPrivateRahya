@@ -2,15 +2,13 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.CountdownTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.NetherHeatTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.TimerTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
@@ -32,12 +30,13 @@ public class Game
     public final int extractionZoneBuffer = 8;
     public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
 
-    public final int baseTime = 1*60;
+    public final int baseTime = 45*60;
 
-    public TimerTask time;
+    private final TimerTask time;
+    private CountdownTask countdownTask;
+    private NetherHeatTask heat;
     public final TitleManager titles = new TitleManager(this);
     public WorldModifier wm;
-    private CountdownTask countdownTask;
     public final World overworld;
     public final World nether;
     public Game()
@@ -50,6 +49,7 @@ public class Game
                 .filter(w -> w.getEnvironment() == World.Environment.NETHER)
                 .findFirst()
                 .orElse(Bukkit.getWorlds().getFirst());
+        overworld.setSpawnLocation(0, 72, 0);
         for(Player p : Bukkit.getOnlinePlayers())
         {
             addParticipant(p);
@@ -57,6 +57,8 @@ public class Game
         }
         nether.getWorldBorder().setCenter(0, 0);
         nether.getWorldBorder().changeSize(vipDistance*3.0F, 1);
+        nether.setDifficulty(Difficulty.HARD);
+        overworld.setDifficulty(Difficulty.HARD);
         wm = new WorldModifier(this);
         time = new TimerTask(this, baseTime);
     }
@@ -70,7 +72,7 @@ public class Game
         clearParticipants();
         for(Player player : Bukkit.getOnlinePlayers())
         {
-            player.setGameMode(GameMode.SURVIVAL);
+            player.setGameMode(GameMode.SPECTATOR);
         }
         return new Game();
     }
@@ -87,6 +89,7 @@ public class Game
             starter.sendMessage("We are still looking for a suitable spot to place the structures! Please try again later, or check the console for long-run logs.");
             return;
         }
+        heat = new NetherHeatTask(this);
 
         currentState = GameState.COUNTDOWN;
         countdownTask = new CountdownTask(this, 3);
@@ -103,7 +106,7 @@ public class Game
         {
             part.beginGame();
         }
-        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(time, 0, 20);
+        time.start();
     }
 
     public void endGame(GameEndReason reason)
@@ -123,7 +126,7 @@ public class Game
                 if(player == null)
                     continue;
 
-                player.playSound(player, Sound.ITEM_GOAT_HORN_SOUND_7, 1, 1);
+                player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_7, 1, 1);
 
                 if(p.isEliminated())
                     continue;
@@ -145,6 +148,7 @@ public class Game
             currentState = GameState.VICTORY;
             clearParticipants();
         }
+        time.cancel();
         nether.getWorldBorder().changeSize(30_000_000, 0);
     }
 
@@ -211,4 +215,5 @@ public class Game
     }
     public TimerTask getTime() {return time;}
     public TitleManager getTitles() {return titles;}
+    public NetherHeatTask getHeat() {return heat;}
 }

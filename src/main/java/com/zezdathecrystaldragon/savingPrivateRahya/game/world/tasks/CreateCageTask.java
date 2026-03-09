@@ -76,10 +76,6 @@ public class CreateCageTask extends WorldTask {
                 if(finalWinner != null)
                 {
                     wm.createVIPCage(game.nether, finalWinner);
-                    long duration = (System.currentTimeMillis() - startTime) / 1000;
-                    logger.info("Success! Cage created at " + finalWinner.getBlockX() + ", "
-                            + finalWinner.getBlockY() + ", " + finalWinner.getBlockZ()
-                            + " after " + duration + "s and " + totalAttempts + " attempts.");
                     this.cancel();
                 }
                 else

@@ -4,7 +4,10 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.util.VIPTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.aura.VIPEffectAura;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.shield.RegeneratingShieldTask;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -17,12 +20,13 @@ import org.bukkit.inventory.meta.Damageable;
 public class VeryImportantParticipant extends Participant
 {
     private final VIPEffectAura aura;
+    private final RegeneratingShieldTask shield;
     public VeryImportantParticipant(Participant p)
     {
         super(p);
         this.aura = new VIPEffectAura(this);
+        this.shield = new RegeneratingShieldTask(this);
         this.spawnLocation = SpawnLocation.NETHER;
-        aura.start();
     }
 
     /**
@@ -39,9 +43,9 @@ public class VeryImportantParticipant extends Participant
     }
 
     @Override
-    protected void giveStartingGear()
+    protected void giveStartingGear(SpawnLocation location)
     {
-        super.giveStartingGear();
+        super.giveStartingGear(location);
         getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
 
         NamespacedKey swordBuff = new NamespacedKey(SavingPrivateRahya.PLUGIN, "vipswordbuff");
@@ -67,8 +71,16 @@ public class VeryImportantParticipant extends Participant
 
     public Participant unVIP()
     {
+        for(ParticipantTask task : tasks)
+        {
+            if(task instanceof VIPTask vipTask)
+            {
+                vipTask.onDemote();
+            }
+        }
         return new Participant(this);
     }
 
     public VIPEffectAura getAura() {return aura;}
+    public RegeneratingShieldTask getShield() {return shield;}
 }

@@ -1,6 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;

@@ -1,10 +1,12 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players;
 
+import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.EliminatedParticipant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.ParticipantTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.RespawningParticipant;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -12,19 +14,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.UUID;
 
 public class Participant
 {
     protected Game game;
     final UUID playerID;
-    ArrayList<ParticipantTask> tasks = new ArrayList<ParticipantTask>();
+    protected ArrayList<ParticipantTask> tasks = new ArrayList<ParticipantTask>();
     protected SpawnLocation spawnLocation;
     boolean eliminated = false;
     Location eliminationLocation;
@@ -70,6 +73,7 @@ public class Participant
     {
         eliminated = true;
         eliminationLocation = getPlayer().getLocation();
+        addTask(new EliminatedParticipant(this));
     }
     public void onDeath(PlayerDeathEvent event)
     {
@@ -115,34 +119,51 @@ public class Participant
     public void beginGame()
     {
         getPlayer().setHealth(getPlayer().getAttribute(Attribute.MAX_HEALTH).getValue());
+        getPlayer().setFoodLevel(20);
+        getPlayer().setSaturation(5);
         getPlayer().clearActivePotionEffects();
         switch (spawnLocation)
         {
             case NETHER -> {
                 getPlayer().teleportAsync(game.wm.getCageCenter()).thenAccept(tpd -> {
-                    if(tpd)
-                    {
-                        getPlayer().getInventory().clear();
-                        giveStartingGear();
-                    }
+                    getPlayer().getInventory().clear();
+                    giveStartingGear(spawnLocation);
                 });
-
             }
             case OVERWORLD -> {
                 getPlayer().teleportAsync(game.overworld.getSpawnLocation()).thenAccept(tpd -> {
                     getPlayer().getInventory().clear();
+                    giveStartingGear(spawnLocation);
                 });
             }
         }
+        getPlayer().setGameMode(GameMode.SURVIVAL);
     }
-    protected void giveStartingGear()
+    protected void giveStartingGear(SpawnLocation location)
     {
-        ItemStack startingPickaxe = new ItemStack(Material.COPPER_PICKAXE);
-        startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
-        getPlayer().getInventory().addItem(startingPickaxe);
-        getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
-        getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
-        getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
+        if(location == SpawnLocation.NETHER) {
+            ItemStack startingPickaxe = new ItemStack(Material.COPPER_PICKAXE);
+            startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
+            getPlayer().getInventory().addItem(startingPickaxe);
+            getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
+            getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
+            getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
+        }
+        ItemStack nethersideCompass = ItemStack.of(Material.COMPASS);
+        CompassMeta meta = (CompassMeta) nethersideCompass.getItemMeta();
+        meta.setLodestoneTracked(false);
+        Location netherSidePortal = game.wm.getNethersidePortal();
+        meta.setLodestone(netherSidePortal);
+        meta.customName(Component.text(String.format("%s's way out", game.getVip().getPlayer().getName())));
+        meta.lore().add(Component.text("Points to the portal generated on the nether side."));
+        meta.lore().add(Component.text(String.format("Nether Coordinates: %d, %d, %d",
+                netherSidePortal.getBlockX(),
+                netherSidePortal.getBlockY(),
+                netherSidePortal.getBlockZ())));
+
+        meta.setRarity(ItemRarity.RARE);
+        nethersideCompass.setItemMeta(meta);
+        getPlayer().getInventory().addItem(nethersideCompass);
     }
 
     public Player getPlayer()
@@ -160,12 +181,21 @@ public class Participant
     }
     public void cancelAllTasks()
     {
-        Iterator<ParticipantTask> iter = tasks.iterator();
-        while(iter.hasNext())
+        for (ParticipantTask task : new ArrayList<>(tasks))
         {
-            ParticipantTask task = iter.next();
             task.cancel();
         }
+        tasks.clear();
+    }
+    public EliminatedParticipant getEliminatedParticipant()
+    {
+        if(!eliminated)
+            return null;
+        return tasks.stream()
+                .filter(task -> task instanceof EliminatedParticipant)
+                .map(task -> (EliminatedParticipant) task)
+                .findFirst()
+                .orElse(null);
     }
     public boolean isEliminated() {return eliminated;}
     public UUID getID() { return playerID;}

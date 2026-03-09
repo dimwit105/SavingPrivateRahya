@@ -3,7 +3,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
-import com.zezdathecrystaldragon.savingPrivateRahya.tasks.CancellableRunnable;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
@@ -19,6 +19,7 @@ public class TimerTask extends CancellableRunnable
     final Component name = Component.text("Nether Stability");
     BossBar visualTimer;
     private boolean revamped = false;
+    private boolean timeDamaged = false;
 
     public TimerTask(Game game, int seconds)
     {
@@ -40,16 +41,22 @@ public class TimerTask extends CancellableRunnable
     @Override
     public void run()
     {
-        if(secondsRemaining <= maximumOvertime)
-        {
-            game.endGame(GameEndReason.TIMER_EXHAUSTED);
-        }
-
         secondsRemaining--;
+        if(timeDamaged) {
+            visualTimer.color(BossBar.Color.RED);
+            timeDamaged = false;
+        }
+        else
+            visualTimer.color(revamped ? BossBar.Color.YELLOW : BossBar.Color.WHITE);
+
         if(secondsRemaining >= 0)
             visualTimer.progress((float) secondsRemaining /(float) secondsMaximum);
         else
             revampTimer();
+        if(secondsRemaining <= maximumOvertime)
+        {
+            game.endGame(GameEndReason.TIMER_EXHAUSTED);
+        }
     }
 
     private void revampTimer()
@@ -62,7 +69,6 @@ public class TimerTask extends CancellableRunnable
             game.nether.getWorldBorder().changeSize(game.extractionZoneTotal, maximumOvertime * -20L);
             revamped = true;
         }
-
     }
 
     public void start()
@@ -70,6 +76,12 @@ public class TimerTask extends CancellableRunnable
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(this, 0, 20);
     }
     public int getSecondsRemaining() {return secondsRemaining;}
+
+    public void damageTime(int amountToDamage)
+    {
+        secondsRemaining -= amountToDamage;
+        timeDamaged = true;
+    }
 
     private void sendBossBars()
     {

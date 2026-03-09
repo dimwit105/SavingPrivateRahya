@@ -1,4 +1,4 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.tasks;
+package com.zezdathecrystaldragon.savingPrivateRahya.util;
 
 import com.tcoded.folialib.wrapper.task.WrappedTask;
 
@@ -10,6 +10,7 @@ public abstract class CancellableRunnable implements Consumer<WrappedTask> {
     public void cancel() {
         cancelled = true;
     }
+    public final boolean isCancelled() {return cancelled;}
 
     public abstract void run();
 

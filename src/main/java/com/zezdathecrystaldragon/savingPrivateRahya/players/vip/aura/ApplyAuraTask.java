@@ -1,6 +1,6 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players.vip.aura;
 
-import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.ParticipantTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
