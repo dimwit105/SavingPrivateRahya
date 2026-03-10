@@ -3,6 +3,8 @@ package com.zezdathecrystaldragon.savingPrivateRahya.events;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.EliminatedParticipant;
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -31,26 +33,34 @@ public class OnPlayerInteract implements Listener
             new PotionEffect(PotionEffectType.SLOWNESS, 300, 0, true,true)
     ));
     Game game = SavingPrivateRahya.PLUGIN.getGame();
+
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEntityEvent event)
-    {
+    public void onPlayerInteract(PlayerInteractEntityEvent event) {
         Player p = event.getPlayer();
         Participant part = game.getParticipants().get(p.getUniqueId());
-        if(!(event.getRightClicked() instanceof LivingEntity ent))
+
+        if (part == null || !(event.getRightClicked() instanceof LivingEntity ent)) return;
+        if (!part.isEliminated() || p.getGameMode() != GameMode.SPECTATOR) return;
+
+        EliminatedParticipant ep = part.getEliminatedParticipant();
+        boolean isBuff = ent instanceof Player;
+
+        List<PotionEffect> pool = isBuff ? buffs : debuffs;
+        int cooldown = isBuff ? ep.getBuffCooldown() : ep.getDebuffCooldown();
+        String typeLabel = isBuff ? "Buff" : "Debuff";
+
+        if (cooldown > 0) {
+            p.sendActionBar(Component.text(String.format("%s not quite ready yet, %d seconds until cooldown!", typeLabel, cooldown)));
             return;
-        if(part == null)
-            return;
-        if(!part.isEliminated() || p.getGameMode() != GameMode.SPECTATOR)
-            return;
-        if(ent instanceof Player friend && part.getEliminatedParticipant().getBuffCooldown() <= 0)
-        {
-            part.getEliminatedParticipant().setBuffCooldown();
-            friend.addPotionEffect(buffs.get(SavingPrivateRahya.RAND.nextInt(buffs.size())));
         }
-        else if(part.getEliminatedParticipant().getDebuffCooldown() <= 0 && !(ent instanceof Player))
-        {
-            part.getEliminatedParticipant().setDebuffCooldown();
-            ent.addPotionEffect(debuffs.get(SavingPrivateRahya.RAND.nextInt(debuffs.size())));
-        }
+
+        PotionEffect effect = pool.get(SavingPrivateRahya.RAND.nextInt(pool.size()));
+        ent.addPotionEffect(effect);
+
+        if (isBuff) ep.setBuffCooldown(); else ep.setDebuffCooldown();
+
+        p.sendActionBar(Component.text(String.format("Applied %s to %s!",
+                effect.getType().getKey().getKey().toLowerCase().replace("_", " "),
+                ent.getName())));
     }
 }
