@@ -16,5 +16,6 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnPlayerPortal(), spr);
         Bukkit.getPluginManager().registerEvents(new OnPlayerDamaged(), spr);
         Bukkit.getPluginManager().registerEvents(new OnBlockBreak(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnPlayerInteract(), spr);
     }
 }

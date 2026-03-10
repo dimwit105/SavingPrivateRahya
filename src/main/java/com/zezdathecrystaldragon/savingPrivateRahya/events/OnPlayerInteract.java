@@ -47,7 +47,7 @@ public class OnPlayerInteract implements Listener
             part.getEliminatedParticipant().setBuffCooldown();
             friend.addPotionEffect(buffs.get(SavingPrivateRahya.RAND.nextInt(buffs.size())));
         }
-        else if(part.getEliminatedParticipant().getDebuffCooldown() <= 0)
+        else if(part.getEliminatedParticipant().getDebuffCooldown() <= 0 && !(ent instanceof Player))
         {
             part.getEliminatedParticipant().setDebuffCooldown();
             ent.addPotionEffect(debuffs.get(SavingPrivateRahya.RAND.nextInt(debuffs.size())));

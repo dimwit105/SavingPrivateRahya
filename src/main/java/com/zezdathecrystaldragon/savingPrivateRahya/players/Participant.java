@@ -21,6 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Participant
@@ -153,13 +154,13 @@ public class Participant
         CompassMeta meta = (CompassMeta) nethersideCompass.getItemMeta();
         meta.setLodestoneTracked(false);
         Location netherSidePortal = game.wm.getNethersidePortal();
-        meta.setLodestone(netherSidePortal);
-        meta.customName(Component.text(String.format("%s's way out", game.getVip().getPlayer().getName())));
-        meta.lore().add(Component.text("Points to the portal generated on the nether side."));
-        meta.lore().add(Component.text(String.format("Nether Coordinates: %d, %d, %d",
+        List<Component> loreToAdd = List.of(Component.text("Points to the portal generated on the nether side."), Component.text(String.format("Nether Coordinates: %d, %d, %d",
                 netherSidePortal.getBlockX(),
                 netherSidePortal.getBlockY(),
                 netherSidePortal.getBlockZ())));
+        meta.setLodestone(netherSidePortal);
+        meta.customName(Component.text(String.format("%s's way out", game.getVip().getPlayer().getName())));
+        meta.lore(loreToAdd);
 
         meta.setRarity(ItemRarity.RARE);
         nethersideCompass.setItemMeta(meta);

@@ -2,11 +2,13 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.PiglinAbstract;
 import org.bukkit.entity.PiglinBrute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -17,7 +19,7 @@ import java.util.List;
 
 public class PiglinSiegeTask extends CancellableRunnable {
 
-    private final PiglinBrute mob;
+    private final PiglinAbstract mob;
     private final Player target;
 
     private final float moveSpeed = 0.8F;
@@ -34,15 +36,15 @@ public class PiglinSiegeTask extends CancellableRunnable {
     // Stair slope controller
     private int stairProgress = 0;
 
-    public PiglinSiegeTask(PiglinBrute mob, Player target) {
+    public PiglinSiegeTask(PiglinAbstract mob, Player target) {
         this.mob = mob;
         this.target = target;
         ItemStack pickaxe = ItemStack.of(Material.GOLDEN_PICKAXE);
-        pickaxe.addUnsafeEnchantment(Enchantment.SHARPNESS, 6);
         mob.getEquipment().setItemInMainHand(pickaxe);
         mob.getEquipment().setItemInOffHand(ItemStack.of(Material.NETHERRACK));
         mob.getEquipment().setDropChance(EquipmentSlot.HAND, 1.0F);
         mob.getEquipment().setDropChance(EquipmentSlot.OFF_HAND, 1.0F);
+        mob.setRemoveWhenFarAway(false);
         mob.setPersistent(true);
 
         SavingPrivateRahya.PLUGIN.getFoliaLib()
@@ -53,7 +55,7 @@ public class PiglinSiegeTask extends CancellableRunnable {
     @Override
     public void run() {
 
-        if (!mob.isValid() || !target.isOnline()) {
+        if (!mob.isValid() || !target.isOnline() || target.getGameMode() != GameMode.SURVIVAL || target.isDead()) {
             cancel();
             return;
         }
@@ -235,6 +237,8 @@ public class PiglinSiegeTask extends CancellableRunnable {
         for (int y = 0; y < 3; y++) {
             Block b = step.clone().add(0, y, 0).getBlock();
             if (b.getType().isSolid() || b.isLiquid()) b.setType(Material.AIR);
+            mob.swingMainHand();
+            step.getWorld().playSound(step, Sound.BLOCK_NETHERRACK_BREAK, 0.5f, 1.2f);
         }
 
         // 3. Headroom for the "Step Up"
@@ -243,6 +247,9 @@ public class PiglinSiegeTask extends CancellableRunnable {
         if (step.getY() > mob.getLocation().getY()) {
             Block ceilingFix = mob.getLocation().add(0, 2, 0).getBlock();
             if (ceilingFix.getType().isSolid()) ceilingFix.setType(Material.AIR);
+            mob.swingMainHand();
+            step.getWorld().playSound(step, Sound.BLOCK_NETHERRACK_BREAK, 0.5f, 1.2f);
+
         }
 
         // 4. Central Pillar (Optional: keeps the core solid)
@@ -257,11 +264,6 @@ public class PiglinSiegeTask extends CancellableRunnable {
         if (mob.getLocation().distanceSquared(step) < 0.6) {
             spiralStep++;
 
-            // Audio feedback only when actually rising
-            if (offset.getY() > 0) {
-                mob.swingMainHand();
-                step.getWorld().playSound(step, Sound.BLOCK_NETHERRACK_BREAK, 0.5f, 1.2f);
-            }
         }
     }
 }

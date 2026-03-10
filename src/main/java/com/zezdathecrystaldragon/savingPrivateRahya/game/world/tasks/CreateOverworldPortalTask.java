@@ -27,7 +27,8 @@ public class CreateOverworldPortalTask extends WorldTask {
             if (loc == null) return;
 
             SavingPrivateRahya.runNextTick(task -> {
-                wm.buildPortal(overworld, loc, orientation);
+                boolean isFallback = (loc.getBlockX() == 0 && loc.getBlockY() == 64 && loc.getBlockZ() == 0);
+                wm.buildPortalWithPlatform(overworld, loc, orientation, isFallback);
             });
         });
     }
@@ -64,7 +65,7 @@ public class CreateOverworldPortalTask extends WorldTask {
                         }
                     }
                 }
-                finalResult.complete(null);
+                finalResult.complete(new Location(overworld, 0, 64, 0));
             });
         });
         return finalResult;

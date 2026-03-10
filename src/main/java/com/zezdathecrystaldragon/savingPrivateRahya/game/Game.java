@@ -11,6 +11,10 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Criteria;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
@@ -61,6 +65,15 @@ public class Game
         overworld.setDifficulty(Difficulty.HARD);
         wm = new WorldModifier(this);
         time = new TimerTask(this, baseTime);
+        try{
+            Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().registerNewObjective("Health", Criteria.HEALTH, Component.text("health"), RenderType.HEARTS);
+            objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+        }
+        catch (IllegalArgumentException e)
+        {
+            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "There's already a scoreboard objective named health, skipping");
+        }
+
     }
 
     public Game newGame()
@@ -133,8 +146,10 @@ public class Game
                 p.eliminate();
                 long delay = SavingPrivateRahya.RAND.nextLong(100) + 50;
                 SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runLater(() -> {
-                    player.getWorld().createExplosion(player.getLocation(), 6f);
-                    player.setHealth(0);
+                    if(player == null)
+                        return;
+                    player.setHealth(0.001953125D);
+                    player.getWorld().createExplosion(player.getLocation(), 9f);
                 }, delay);
             }
         }

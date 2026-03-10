@@ -5,13 +5,17 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Piglin;
 import org.bukkit.entity.PiglinBrute;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 public class NetherHeatTask extends CancellableRunnable
 {
@@ -33,6 +37,7 @@ public class NetherHeatTask extends CancellableRunnable
     @Override
     public void run()
     {
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Nether heat is %d of %d", heat, heatEffectsStarting));
         if(coolingTimer > coolingThreshold)
         {
             if(heat < heatEffectsStarting)
@@ -67,7 +72,7 @@ public class NetherHeatTask extends CancellableRunnable
         ArrayList<Player> potentialTargets = new ArrayList<>();
         for(Participant part : game.getParticipants().values())
         {
-            if(part.getPlayer() == null || part.getPlayer().getWorld().getEnvironment() != World.Environment.NETHER)
+            if(part.getPlayer() == null || part.getPlayer().getWorld().getEnvironment() != World.Environment.NETHER || part.isEliminated())
                 continue;
             potentialTargets.add(part.getPlayer());
         }
@@ -93,7 +98,9 @@ public class NetherHeatTask extends CancellableRunnable
         }
         if(spawnLocation == null)
             return null;
-        PiglinBrute pb = target.getWorld().spawn(spawnLocation, PiglinBrute.class);
+        Piglin pb = target.getWorld().spawn(spawnLocation, Piglin.class);
+        heat -= heatEffectsStarting/2;
+        Bukkit.broadcast(Component.text("You hear the distant sound of blocks breaking"));
         return new PiglinSiegeTask(pb, target);
     }
     private void cleanSiegerList()

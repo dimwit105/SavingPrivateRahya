@@ -22,13 +22,14 @@ public class OnBlockBreak implements Listener
 
         game.getHeat().incrementHeat();
         int heat = game.getHeat().getHeatValue();
-        ItemStack item = event.getPlayer().getActiveItem();
+        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         if(heat > game.getHeat().heatEffectsStarting && item.getItemMeta() instanceof Damageable meta)
         {
             int damageToDeal = GameMath.stochasticRounding((heat - game.getHeat().heatEffectsStarting) / 100D);
             if(damageToDeal > 0)
             {
                 meta.setDamage(meta.getDamage() + damageToDeal);
+                item.setItemMeta(meta);
                 event.getBlock().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
             }
         }

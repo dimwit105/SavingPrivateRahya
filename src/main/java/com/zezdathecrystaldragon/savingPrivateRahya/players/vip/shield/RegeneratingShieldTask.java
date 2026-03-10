@@ -57,7 +57,6 @@ public class RegeneratingShieldTask extends VIPTask
         Player player = vip.getPlayer();
         if(player == null)
             return;
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("VIP shield regen task is running. TickCounter: %d, EffectiveDelay: %d", tickCounter, effectiveDelay));
         setMaxAbsorption(effectiveCapacity);
         if(tickCounter < effectiveDelay)
         {
