@@ -82,6 +82,10 @@ public class TimerTask extends CancellableRunnable
         secondsRemaining -= amountToDamage;
         timeDamaged = true;
     }
+    public double getTimerPercentage()
+    {
+        return (double) secondsRemaining / secondsMaximum;
+    }
 
     private void sendBossBars()
     {

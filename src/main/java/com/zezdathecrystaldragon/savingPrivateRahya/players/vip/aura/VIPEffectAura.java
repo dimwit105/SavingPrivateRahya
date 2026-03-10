@@ -27,4 +27,5 @@ public class VIPEffectAura
         vip.addTask(new ApplyAuraTask(vip));
     }
     public int getLevel() {return level;}
+    public void levelUp() { level++; if(level > 6 ) level = 6;}
 }

@@ -24,12 +24,13 @@ public class NetherHeatTask extends CancellableRunnable
     private int coolingTimer = 0;
     public final int heatEffectsStarting;
     private final int coolingThreshold;
+    boolean canQuickCool = true;
     private ArrayList<PiglinSiegeTask> siegers = new ArrayList<PiglinSiegeTask>();
 
     public NetherHeatTask(Game game)
     {
         this.game = game;
-        this.coolingThreshold = (int) Math.ceil(60 / GameMath.getHarmonicNumber(game.getParticipants().size()));
+        this.coolingThreshold = (int) Math.ceil(120 / (1 + GameMath.getHarmonicNumber(game.getParticipants().size())));
         heatEffectsStarting = 64 + game.getParticipants().size()*64;
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(this, 0, 20);
     }
@@ -40,10 +41,10 @@ public class NetherHeatTask extends CancellableRunnable
         SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Nether heat is %d of %d", heat, heatEffectsStarting));
         if(coolingTimer > coolingThreshold)
         {
-            if(heat < heatEffectsStarting)
+            if(canQuickCool)
                 heat = 0;
-            else
-                heat--;
+            else if(heat > 0)
+                heat-= Math.max(GameMath.stochasticRounding((double) heat / heatEffectsStarting), 1);
         }
         else
         {
@@ -54,17 +55,26 @@ public class NetherHeatTask extends CancellableRunnable
     {
         return heat;
     }
-    public void incrementHeat()
-    {
+    public void incrementHeat() {
         cleanSiegerList();
+        if(game.getTime().getTimerPercentage() > 5D/6D)
+            return;
+
         heat++;
         coolingTimer = 0;
+
         int excess = heat - heatEffectsStarting;
-        if(heat > heatEffectsStarting && siegers.size() < game.getParticipants().size() && SavingPrivateRahya.RAND.nextInt(heatEffectsStarting*2) < excess)
-        {
-            PiglinSiegeTask sieger = spawnSieger();
-            if(sieger != null)
-                siegers.add(sieger);
+
+        if (excess > 0 && siegers.size() < game.getParticipants().size()) {
+            canQuickCool = false;
+            double excessCubed = Math.pow(excess, 3);
+            double kCubed = Math.pow(heatEffectsStarting, 3) * GameMath.getHarmonicNumber(game.getParticipants().size());
+            double probability = excessCubed / (excessCubed + kCubed);
+
+            if (SavingPrivateRahya.RAND.nextDouble() < probability) {
+                PiglinSiegeTask sieger = spawnSieger();
+                if (sieger != null) siegers.add(sieger);
+            }
         }
     }
     private PiglinSiegeTask spawnSieger()
@@ -99,7 +109,6 @@ public class NetherHeatTask extends CancellableRunnable
         if(spawnLocation == null)
             return null;
         Piglin pb = target.getWorld().spawn(spawnLocation, Piglin.class);
-        heat -= heatEffectsStarting/2;
         Bukkit.broadcast(Component.text("You hear the distant sound of blocks breaking"));
         return new PiglinSiegeTask(pb, target);
     }
