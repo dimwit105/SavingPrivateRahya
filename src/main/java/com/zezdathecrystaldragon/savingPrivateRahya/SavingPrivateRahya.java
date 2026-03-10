@@ -8,6 +8,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.PiglinSiegeTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -80,7 +81,7 @@ public final class SavingPrivateRahya extends JavaPlugin
                 sender.sendMessage("I couldn't find that player");
                 return false;}
             game.makeVIP(newVIP);
-            sender.sendMessage(playerName + " is the new VIP!");
+            Bukkit.broadcast(Component.text(playerName + " is the new VIP!"));
             return true;
         }
         if(cmd.getName().equalsIgnoreCase("choosespawn"))
@@ -92,6 +93,7 @@ public final class SavingPrivateRahya extends JavaPlugin
                 try
                 {
                     SpawnLocation where = SpawnLocation.valueOf(spawn);
+                    Bukkit.broadcast(Component.text(String.format("%s has chose to spawn in the %s", sender.getName(), spawn.toLowerCase())));
                     return part.electSpawn(where);
                 }
                 catch (IllegalArgumentException e)
@@ -139,6 +141,12 @@ public final class SavingPrivateRahya extends JavaPlugin
         if(cmd.getName().equalsIgnoreCase("choosespawn"))
         {
             return List.of("NETHER", "OVERWORLD");
+        }
+        if(cmd.getName().equalsIgnoreCase("svp"))
+        {
+            String firstArg = args[0].toLowerCase();
+            List<String> subCommands = new ArrayList<>(List.of("start", "reset", "cancel"));
+            return StringUtil.copyPartialMatches(args[0], subCommands, new ArrayList<>());
         }
         return null;
     }

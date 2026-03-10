@@ -20,7 +20,7 @@ public class TitleManager {
 
     public void sendTitleToOnlineOneSecond(Component what) {
         if (currentlyShownTitle == null) {
-            Title.Times times = Title.Times.times(Ticks.duration(0), Ticks.duration(20), Ticks.duration(0));
+            Title.Times times = Title.Times.times(Ticks.duration(3), Ticks.duration(14), Ticks.duration(3));
             Title title = Title.title(what, Component.empty(), times);
             currentlyShownTitle = title;
             SavingPrivateRahya.PLUGIN.getServer().showTitle(title);
