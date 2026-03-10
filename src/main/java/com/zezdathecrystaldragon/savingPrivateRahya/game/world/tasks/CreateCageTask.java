@@ -3,6 +3,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -21,12 +22,13 @@ import java.util.logging.Logger;
 public class CreateCageTask extends WorldTask {
 
     private final int BATCHSIZE = 5;
-
     private final Logger logger;
     private final long startTime;
     private final int cageSize;
-    private boolean searching = false;
+    private final int netherifiedX;
+    private final int netherifiedZ;
 
+    private boolean searching = false;
     private long lastWarningTime;
     private int totalAttempts = 0;
 
@@ -36,78 +38,59 @@ public class CreateCageTask extends WorldTask {
         this.startTime = System.currentTimeMillis();
         this.cageSize = cageSize;
         this.lastWarningTime = startTime;
+
+        Location nCenter = GameMath.netherify(game.nether, game.gameCenter);
+        this.netherifiedX = nCenter.getBlockX();
+        this.netherifiedZ = nCenter.getBlockZ();
     }
 
     @Override
     public void run() {
-        if(searching)
-        {
-            long currentTime = System.currentTimeMillis();
-            long elapsedSeconds = (currentTime - startTime) / 1000;
-
-            if (elapsedSeconds >= 60 && (currentTime - lastWarningTime) >= 5000) {
-                logger.warning("Still searching for VIP Cage... Elapsed: "
-                        + elapsedSeconds + "s | Total Attempts: " + totalAttempts);
-                lastWarningTime = currentTime;
-            }
+        if (searching) {
+            handleLogging();
             return;
         }
         searching = true;
 
         List<CompletableFuture<Location>> batch = new ArrayList<>();
-        for(int i = 0; i < BATCHSIZE; i++)
-        {
+        for (int i = 0; i < BATCHSIZE; i++) {
             batch.add(findOneRandomLocation(game.nether));
         }
+
         CompletableFuture.allOf(batch.toArray(new CompletableFuture[0])).thenAccept(v -> {
             Location winner = null;
-            for(CompletableFuture<Location> future : batch)
-            {
+            for (CompletableFuture<Location> future : batch) {
                 Location loc = future.join();
                 totalAttempts++;
-                if(loc != null)
-                {
+                if (loc != null) {
                     winner = loc;
                     break;
                 }
             }
+
             final Location finalWinner = winner;
             SavingPrivateRahya.runNextTick(wrappedTask -> {
-                if(finalWinner != null)
-                {
+                if (finalWinner != null) {
                     wm.createVIPCage(game.nether, finalWinner);
                     this.cancel();
-                }
-                else
-                {
+                } else {
                     searching = false;
                 }
             });
         });
     }
+
     public CompletableFuture<Location> findOneRandomLocation(World nether) {
-
         CompletableFuture<Location> finalResult = new CompletableFuture<>();
-
         Random random = SavingPrivateRahya.RAND;
+
         double theta = random.nextDouble() * 2 * Math.PI;
-        double skew = random.nextDouble();
-        double r = game.vipDistance + (skew * (game.vipDistance * 0.1666D));
+        double r = game.vipDistance + (random.nextDouble() * (game.vipDistance * 0.1666D));
 
-        int x = (int) (r * Math.cos(theta));
-        int z = (int) (r * Math.sin(theta));
+        int x = (int) (r * Math.cos(theta)) + netherifiedX;
+        int z = (int) (r * Math.sin(theta)) + netherifiedZ;
 
-        int chunkX = x >> 4;
-        int chunkZ = z >> 4;
-
-        CompletableFuture<?>[] grid = new CompletableFuture[9];
-        int i = 0;
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                grid[i++] = game.nether.getChunkAtAsync(chunkX + dx, chunkZ + dz);
-            }
-        }
-        CompletableFuture.allOf(grid).thenAccept(v -> {
+        loadLocalChunks(nether, x, z).thenAccept(v -> {
             SavingPrivateRahya.runNextTick(wrappedTask -> {
                 Location found = null;
                 for (int y = 30; y < 110; y++) {
@@ -115,6 +98,7 @@ public class CreateCageTask extends WorldTask {
 
                     if (floor.getType().isSolid() && floor.getType() != Material.LAVA) {
                         if (isCubeClear(nether, x, y + 1, z, cageSize)) {
+                            // Secondary safety check: ensure floor isn't a thin crust over lava
                             if (nether.getBlockAt(x, y - 1, z).getType() != Material.LAVA) {
                                 found = new Location(nether, x, y, z);
                                 break;
@@ -126,5 +110,16 @@ public class CreateCageTask extends WorldTask {
             });
         });
         return finalResult;
+    }
+
+    private void handleLogging() {
+        long currentTime = System.currentTimeMillis();
+        long elapsedSeconds = (currentTime - startTime) / 1000;
+
+        if (elapsedSeconds >= 60 && (currentTime - lastWarningTime) >= 5000) {
+            logger.warning(String.format("Still searching for VIP Cage... Elapsed: %ds | Total Attempts: %d",
+                    elapsedSeconds, totalAttempts));
+            lastWarningTime = currentTime;
+        }
     }
 }

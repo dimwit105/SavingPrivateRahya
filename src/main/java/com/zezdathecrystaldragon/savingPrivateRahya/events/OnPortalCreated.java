@@ -1,7 +1,11 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,10 +19,18 @@ import java.util.List;
  */
 public class OnPortalCreated implements Listener
 {
-    int check = SavingPrivateRahya.PLUGIN.getGame().extractionZoneTotal;
     @EventHandler
-    public void onPortalCreated(PortalCreateEvent event) {
+    public void onPortalCreated(PortalCreateEvent event)
+    {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
+        Location overworldCenter = game.gameCenter;
+        Location netherCenter = GameMath.netherify(game.nether, game.gameCenter);
+
         if (event.getReason() != PortalCreateEvent.CreateReason.FIRE) return;
+        boolean isOverworld = event.getWorld().getEnvironment() == World.Environment.NORMAL;
+        Location center = isOverworld ? overworldCenter : netherCenter;
+        int buffer = game.extractionZoneBuffer;
+        int check = isOverworld ? game.extractionZone + buffer : (game.extractionZone >> 3) + buffer;
 
         List<BlockState> blocks = event.getBlocks();
         boolean outOfBounds = false;
@@ -27,7 +39,7 @@ public class OnPortalCreated implements Listener
             int x = block.getX();
             int z = block.getZ();
 
-            if (Math.abs(x) > check || Math.abs(z) > check) {
+            if (Math.abs(x - center.getBlockX()) > check || Math.abs(z - center.getBlockZ()) > check) {
                 outOfBounds = true;
                 break;
             }

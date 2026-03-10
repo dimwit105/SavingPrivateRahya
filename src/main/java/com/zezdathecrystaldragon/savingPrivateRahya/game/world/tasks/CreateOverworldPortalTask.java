@@ -37,35 +37,26 @@ public class CreateOverworldPortalTask extends WorldTask {
         CompletableFuture<Location> finalResult = new CompletableFuture<>();
         Random random = SavingPrivateRahya.RAND;
 
-        CompletableFuture<?>[] grid = new CompletableFuture[64];
-        int count = 0;
-        for (int dx = -4; dx <= 3; dx++) {
-            for (int dz = -4; dz <= 3; dz++) {
-                grid[count++] = overworld.getChunkAtAsync(dx, dz);
-            }
-        }
+        int centerX = game.gameCenter.getBlockX();
+        int centerZ = game.gameCenter.getBlockZ();
 
-        CompletableFuture.allOf(grid).thenAccept(v -> {
+        loadLocalChunks(overworld, centerX, centerZ).thenAccept(v -> {
             SavingPrivateRahya.runNextTick(wrappedTask -> {
                 for (int attempts = 0; attempts < 600; attempts++) {
-                    int x = random.nextInt(128) - 64;
-                    int z = random.nextInt(128) - 64;
+                    int x = centerX + random.nextInt(128) - 64;
+                    int z = centerZ + random.nextInt(128) - 64;
 
                     Block floor = overworld.getHighestBlockAt(x, z);
-
                     if (floor.getType().isSolid() && !floor.isLiquid()) {
-                        int y = floor.getY() + 1;
-
-                        int widthX = (orientation == WorldModifier.PortalOrientation.X_AXIS) ? 4 : 1;
-                        int widthZ = (orientation == WorldModifier.PortalOrientation.Z_AXIS) ? 4 : 1;
-
-                        if (isRectCuboidClear(overworld, x, y, z, widthX, 5, widthZ)) {
-                            finalResult.complete(new Location(overworld, x, y, z));
+                        if (isRectCuboidClear(overworld, x, floor.getY() + 1, z,
+                                (orientation == WorldModifier.PortalOrientation.X_AXIS ? 4 : 1), 5,
+                                (orientation == WorldModifier.PortalOrientation.Z_AXIS ? 4 : 1))) {
+                            finalResult.complete(new Location(overworld, x, floor.getY() + 1, z));
                             return;
                         }
                     }
                 }
-                finalResult.complete(new Location(overworld, 0, 64, 0));
+                finalResult.complete(new Location(overworld, centerX, 64, centerZ));
             });
         });
         return finalResult;

@@ -7,6 +7,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.TimerTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -35,6 +36,7 @@ public class Game
     public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
 
     public final int baseTime = 45*60;
+    public final Location gameCenter;
 
     private final TimerTask time;
     private CountdownTask countdownTask;
@@ -53,13 +55,14 @@ public class Game
                 .filter(w -> w.getEnvironment() == World.Environment.NETHER)
                 .findFirst()
                 .orElse(Bukkit.getWorlds().getFirst());
-        overworld.setSpawnLocation(0, 72, 0);
+        //overworld.setSpawnLocation(0, 72, 0);
+        gameCenter = overworld.getSpawnLocation();
         for(Player p : Bukkit.getOnlinePlayers())
         {
             addParticipant(p);
             p.teleportAsync(overworld.getSpawnLocation());
         }
-        nether.getWorldBorder().setCenter(0, 0);
+        nether.getWorldBorder().setCenter(GameMath.netherify(nether, gameCenter).getBlockX(), GameMath.netherify(nether, gameCenter).getBlockZ());
         nether.getWorldBorder().changeSize(vipDistance*3.0F, 1);
         nether.setDifficulty(Difficulty.HARD);
         overworld.setDifficulty(Difficulty.HARD);
@@ -79,6 +82,9 @@ public class Game
     public Game newGame()
     {
         time.cancel();
+        if (heat != null) { // Add this guard
+            heat.cancel();
+        }
         if (countdownTask != null) {
             countdownTask.cancel();
         }

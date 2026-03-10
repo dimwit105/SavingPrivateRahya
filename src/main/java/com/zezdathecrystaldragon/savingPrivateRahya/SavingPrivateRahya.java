@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 
 public final class SavingPrivateRahya extends JavaPlugin
 {
-    public Game game;
+    private Game game;
     public static SavingPrivateRahya PLUGIN;
     public static Random RAND = new Random();
     private FoliaLib foliaLib;
