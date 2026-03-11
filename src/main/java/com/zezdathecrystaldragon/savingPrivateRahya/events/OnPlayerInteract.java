@@ -32,10 +32,10 @@ public class OnPlayerInteract implements Listener
             new PotionEffect(PotionEffectType.LEVITATION, 100, 0, true, false),
             new PotionEffect(PotionEffectType.SLOWNESS, 300, 0, true,true)
     ));
-    Game game = SavingPrivateRahya.PLUGIN.getGame();
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEntityEvent event) {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
         Player p = event.getPlayer();
         Participant part = game.getParticipants().get(p.getUniqueId());
 

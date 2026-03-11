@@ -6,6 +6,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.RespawningParticipant;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.ItemUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -150,21 +151,7 @@ public class Participant
             getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
             getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
         }
-        ItemStack nethersideCompass = ItemStack.of(Material.COMPASS);
-        CompassMeta meta = (CompassMeta) nethersideCompass.getItemMeta();
-        meta.setLodestoneTracked(false);
-        Location netherSidePortal = game.wm.getNethersidePortal();
-        List<Component> loreToAdd = List.of(Component.text("Points to the portal generated on the nether side."), Component.text(String.format("Nether Coordinates: %d, %d, %d",
-                netherSidePortal.getBlockX(),
-                netherSidePortal.getBlockY(),
-                netherSidePortal.getBlockZ())));
-        meta.setLodestone(netherSidePortal);
-        meta.customName(Component.text(String.format("%s's way out", game.getVip().getPlayer().getName())));
-        meta.lore(loreToAdd);
-
-        meta.setRarity(ItemRarity.RARE);
-        nethersideCompass.setItemMeta(meta);
-        getPlayer().getInventory().addItem(nethersideCompass);
+        ItemUtil.giveNethersideCompass(this);
     }
 
     public Player getPlayer()
@@ -200,5 +187,6 @@ public class Participant
     }
     public boolean isEliminated() {return eliminated;}
     public UUID getID() { return playerID;}
+    public Game getGame() {return game;}
 
 }

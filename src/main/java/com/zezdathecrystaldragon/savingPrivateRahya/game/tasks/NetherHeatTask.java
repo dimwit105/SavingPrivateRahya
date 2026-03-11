@@ -57,8 +57,8 @@ public class NetherHeatTask extends CancellableRunnable
     }
     public void incrementHeat() {
         cleanSiegerList();
-        if(game.getTime().getTimerPercentage() > 5D/6D)
-            return;
+        //if(game.getTime().getTimerPercentage() > 5D/6D)
+            //return;
 
         heat++;
         coolingTimer = 0;

@@ -15,10 +15,10 @@ import java.util.UUID;
 
 public class OnPlayerPortal implements Listener
 {
-    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerPortal(PlayerPortalEvent event)
     {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
         Map<UUID, Participant> parts = game.getParticipants();
         Participant part = parts.get(event.getPlayer().getUniqueId());
         if(part == null)

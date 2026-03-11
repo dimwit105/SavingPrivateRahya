@@ -10,10 +10,11 @@ import java.util.UUID;
 
 public class OnPlayersDisconnect implements Listener
 {
-    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerDisconnect(PlayerQuitEvent event)
     {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
+
         UUID id = event.getPlayer().getUniqueId();
         if(game.getParticipants().containsKey(id))
             game.getParticipants().get(id).onDisconnect(event);

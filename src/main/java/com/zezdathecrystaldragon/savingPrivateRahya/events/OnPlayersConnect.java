@@ -10,10 +10,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class OnPlayersConnect implements Listener
 {
-    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event)
     {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
         if(!game.getParticipants().containsKey(event.getPlayer().getUniqueId()))
         {
             if(game.isPreGame())

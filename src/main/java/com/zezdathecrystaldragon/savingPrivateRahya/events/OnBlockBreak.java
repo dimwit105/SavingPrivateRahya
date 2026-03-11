@@ -3,23 +3,24 @@ package com.zezdathecrystaldragon.savingPrivateRahya.events;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
+import java.util.logging.Level;
+
 public class OnBlockBreak implements Listener
 {
-    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event)
     {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
         if(game.isPreGame() || game.getHeat() == null)
+            return;
+        if(event.getBlock().getWorld().getEnvironment() != World.Environment.NETHER)
             return;
 
         game.getHeat().incrementHeat();
@@ -33,13 +34,10 @@ public class OnBlockBreak implements Listener
                     Particle.FLAME,
                     loc.clone().add(0.5, 0.5, 0.5),
                     particleCount,
-                    0.5, 0.5, 0.5,
-                    0.05
+                    0.25, 0.25, 0.25,
+                    0.02
             );
-            event.getBlock().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
         }
-
-        loc.getWorld().spawnParticle(Particle.FLAME, loc, 3);
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         if(heat > game.getHeat().heatEffectsStarting && item.getItemMeta() instanceof Damageable meta)
         {
@@ -48,6 +46,7 @@ public class OnBlockBreak implements Listener
             {
                 meta.setDamage(meta.getDamage() + damageToDeal);
                 item.setItemMeta(meta);
+                event.getBlock().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LAVA_EXTINGUISH, 1, 1);
             }
         }
         if(heat > game.getHeat().heatEffectsStarting * 3 && SavingPrivateRahya.RAND.nextInt(10) == 0) {

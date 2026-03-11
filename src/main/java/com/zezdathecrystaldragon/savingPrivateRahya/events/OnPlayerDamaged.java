@@ -9,10 +9,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 public class OnPlayerDamaged implements Listener
 {
-    Game game = SavingPrivateRahya.PLUGIN.getGame();
     @EventHandler
     public void onPlayerDamaged(EntityDamageEvent event)
     {
+        Game game = SavingPrivateRahya.PLUGIN.getGame();
         if(event.getEntity() instanceof Player p)
         {
             if(game.getVip() != null && game.getVip().getPlayer() == p && event.getFinalDamage() > 0)
