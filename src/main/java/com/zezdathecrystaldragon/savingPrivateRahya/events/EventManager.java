@@ -1,6 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.OnMobSpawn;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.player.*;
 import org.bukkit.Bukkit;
 
@@ -18,5 +19,6 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnPlayerDamaged(), spr);
         Bukkit.getPluginManager().registerEvents(new OnBlockBreak(), spr);
         Bukkit.getPluginManager().registerEvents(new OnPlayerInteract(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnMobSpawn(), spr);
     }
 }
