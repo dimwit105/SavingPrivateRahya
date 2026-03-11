@@ -121,6 +121,7 @@ public class Participant
     public void beginGame()
     {
         getPlayer().setHealth(getPlayer().getAttribute(Attribute.MAX_HEALTH).getValue());
+        getPlayer().setFireTicks(0);
         getPlayer().setFoodLevel(20);
         getPlayer().setSaturation(5);
         getPlayer().clearActivePotionEffects();

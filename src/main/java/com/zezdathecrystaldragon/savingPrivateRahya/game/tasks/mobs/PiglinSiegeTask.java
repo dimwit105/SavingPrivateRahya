@@ -1,26 +1,20 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
+package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs;
 
-import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
-import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
-import org.bukkit.GameMode;
+
+import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.PiglinAbstract;
-import org.bukkit.entity.PiglinBrute;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 
-public class PiglinSiegeTask extends CancellableRunnable {
-
-    private final PiglinAbstract mob;
-    private final Player target;
+public class PiglinSiegeTask extends MobTask {
 
     private final float moveSpeed = 0.8F;
 
@@ -36,9 +30,8 @@ public class PiglinSiegeTask extends CancellableRunnable {
     // Stair slope controller
     private int stairProgress = 0;
 
-    public PiglinSiegeTask(PiglinAbstract mob, Player target) {
-        this.mob = mob;
-        this.target = target;
+    public PiglinSiegeTask(Game game) {
+        super(game, EntityType.PIGLIN, game.nether);
         ItemStack pickaxe = ItemStack.of(Material.GOLDEN_PICKAXE);
         mob.getEquipment().setItemInMainHand(pickaxe);
         mob.getEquipment().setItemInOffHand(ItemStack.of(Material.NETHERRACK));
@@ -46,20 +39,11 @@ public class PiglinSiegeTask extends CancellableRunnable {
         mob.getEquipment().setDropChance(EquipmentSlot.OFF_HAND, 1.0F);
         mob.setRemoveWhenFarAway(false);
         mob.setPersistent(true);
-
-        SavingPrivateRahya.PLUGIN.getFoliaLib()
-                .getScheduler()
-                .runAtEntityTimer(mob, this, 0, 3);
     }
 
     @Override
     public void run() {
-
-        if (!mob.isValid() || !target.isOnline() || target.getGameMode() != GameMode.SURVIVAL || target.isDead()) {
-            cancel();
-            return;
-        }
-
+        super.run();
         Location mLoc = mob.getLocation();
         Location tLoc = target.getLocation();
 
@@ -98,16 +82,7 @@ public class PiglinSiegeTask extends CancellableRunnable {
         executeHorizontalSiege(tLoc);
     }
 
-    private boolean hasValidPath() {
 
-        var path = mob.getPathfinder().getCurrentPath();
-
-        if (path == null || path.getFinalPoint() == null)
-            return false;
-
-        return path.getFinalPoint()
-                .distanceSquared(target.getLocation()) < 4;
-    }
 
     private void resetSpiral() {
         spiralCenter = null;

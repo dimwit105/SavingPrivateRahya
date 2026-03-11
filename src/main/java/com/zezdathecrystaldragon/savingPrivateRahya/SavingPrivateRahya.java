@@ -5,7 +5,7 @@ import com.tcoded.folialib.wrapper.task.WrappedTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.EventManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.PiglinSiegeTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
 import net.kyori.adventure.text.Component;
@@ -107,21 +107,7 @@ public final class SavingPrivateRahya extends JavaPlugin
         }
         if(cmd.getName().equals("testsiege") && sender instanceof Player player)
         {
-
-            Location spawnLoc = player.getLocation();
-            World world = spawnLoc.getWorld();
-
-            PiglinBrute brute = world.spawn(spawnLoc, PiglinBrute.class, (entity) -> {
-                entity.setRemoveWhenFarAway(false);
-                entity.setCanPickupItems(false); // Keeps them focused on the kill, not loot
-                entity.setAdult();
-
-            });
-
-            brute.setTarget(player);
-
-
-            new PiglinSiegeTask(brute, player);
+            new PiglinSiegeTask(game);
         }
         return false;
     }

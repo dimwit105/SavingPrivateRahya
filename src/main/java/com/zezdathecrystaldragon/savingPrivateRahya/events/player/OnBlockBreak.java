@@ -1,4 +1,4 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.events;
+package com.zezdathecrystaldragon.savingPrivateRahya.events.player;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
@@ -9,8 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
-
-import java.util.logging.Level;
 
 public class OnBlockBreak implements Listener
 {

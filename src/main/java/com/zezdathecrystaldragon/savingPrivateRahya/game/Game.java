@@ -4,6 +4,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.CountdownTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.NetherHeatTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.TimerTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.MobManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
@@ -38,11 +39,12 @@ public class Game
     public final int baseTime = 45*60;
     public final Location gameCenter;
 
-    private final TimerTask time;
+    private final TimerTask time = new TimerTask(this, baseTime);
+    private final MobManager mobs = new MobManager(this);
     private CountdownTask countdownTask;
     private NetherHeatTask heat;
     public final TitleManager titles = new TitleManager(this);
-    public WorldModifier wm;
+    public WorldModifier wm = new WorldModifier(this);;
     public final World overworld;
     public final World nether;
     public Game()
@@ -66,8 +68,6 @@ public class Game
         nether.getWorldBorder().changeSize(vipDistance*3.0F, 1);
         nether.setDifficulty(Difficulty.HARD);
         overworld.setDifficulty(Difficulty.HARD);
-        wm = new WorldModifier(this);
-        time = new TimerTask(this, baseTime);
         try{
             Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().registerNewObjective("Health", Criteria.HEALTH, Component.text("health"), RenderType.HEARTS);
             objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
@@ -152,7 +152,7 @@ public class Game
                 p.eliminate();
                 long delay = SavingPrivateRahya.RAND.nextLong(100) + 50;
                 SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runLater(() -> {
-                    if(player == null)
+                    if(player == null || player.isDead())
                         return;
                     player.setHealth(0.001953125D);
                     player.getWorld().createExplosion(player.getLocation(), 9f);
@@ -176,7 +176,7 @@ public class Game
     /**
      * Adds a player as a participant to the game, if they are not already a participant.
      * @param player the player to add as a participant
-     * @return whether or not the player was actually added to the list.
+     * @return whether the player was actually added to the list.
      */
     public boolean addParticipant(Player player)
     {
@@ -237,4 +237,5 @@ public class Game
     public TimerTask getTime() {return time;}
     public TitleManager getTitles() {return titles;}
     public NetherHeatTask getHeat() {return heat;}
+    public MobManager getMobs() {return mobs;}
 }

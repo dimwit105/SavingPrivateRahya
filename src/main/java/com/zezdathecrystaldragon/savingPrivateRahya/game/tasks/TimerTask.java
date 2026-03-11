@@ -15,6 +15,7 @@ public class TimerTask extends CancellableRunnable
     int secondsRemaining;
     int secondsMaximum;
     int maximumOvertime;
+    int segmentsRemaining = 6;
     public static final NamespacedKey TIMER_BAR = new NamespacedKey(SavingPrivateRahya.PLUGIN, "timer_bar");
     final Component name = Component.text("Nether Stability");
     BossBar visualTimer;
@@ -41,6 +42,7 @@ public class TimerTask extends CancellableRunnable
     @Override
     public void run()
     {
+        //Game time logic
         secondsRemaining--;
         if(timeDamaged) {
             visualTimer.color(BossBar.Color.RED);
@@ -49,10 +51,14 @@ public class TimerTask extends CancellableRunnable
         else
             visualTimer.color(revamped ? BossBar.Color.YELLOW : BossBar.Color.WHITE);
 
-        if(secondsRemaining >= 0)
-            visualTimer.progress((float) secondsRemaining /(float) secondsMaximum);
-        else
+        if(secondsRemaining >= 0) {
+            visualTimer.progress((float) secondsRemaining / (float) secondsMaximum);
+            this.segmentsRemaining = (int) Math.ceil(visualTimer.progress() * 6);
+        }
+        else{
             revampTimer();
+            this.segmentsRemaining = (int) (visualTimer.progress() * -6);
+        }
         if(secondsRemaining <= maximumOvertime)
         {
             game.endGame(GameEndReason.TIMER_EXHAUSTED);
@@ -95,4 +101,5 @@ public class TimerTask extends CancellableRunnable
     {
         player.showBossBar(visualTimer);
     }
+    public int getSegmentsRemaining() {return segmentsRemaining;}
 }
