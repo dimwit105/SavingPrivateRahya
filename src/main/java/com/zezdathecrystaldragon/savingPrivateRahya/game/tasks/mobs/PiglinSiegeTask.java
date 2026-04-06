@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +34,10 @@ public class PiglinSiegeTask extends MobTask {
     public PiglinSiegeTask(Game game) {
         super(game, EntityType.PIGLIN, game.nether);
         ItemStack pickaxe = ItemStack.of(Material.GOLDEN_PICKAXE);
+        if(mob instanceof Ageable age)
+        {
+            age.setAdult();
+        }
         mob.getEquipment().setItemInMainHand(pickaxe);
         mob.getEquipment().setItemInOffHand(ItemStack.of(Material.NETHERRACK));
         mob.getEquipment().setDropChance(EquipmentSlot.HAND, 1.0F);

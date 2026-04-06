@@ -6,10 +6,16 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateCageT
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateNetherPortalTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateOverworldPortalTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.WorldTask;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
+import io.papermc.paper.registry.TypedKey;
+import io.papermc.paper.registry.keys.tags.BiomeTagKeys;
 import org.bukkit.*;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.BiomeSearchResult;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -64,6 +70,23 @@ public class WorldModifier
         world.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
         SavingPrivateRahya.PLUGIN.getLogger().info("Portal flag saved to PDC for " + world.getName());
     }
+    public static int getAndIncrementGameIndex(World world) {
+        PersistentDataContainer pdc = world.getPersistentDataContainer();
+
+        int currentIndex = pdc.getOrDefault(SavingPrivateRahya.PLUGIN.GAME_INDEX_KEY, PersistentDataType.INTEGER, 0);
+
+        int nextIndex = currentIndex + 1;
+        pdc.set(SavingPrivateRahya.PLUGIN.GAME_INDEX_KEY, PersistentDataType.INTEGER, nextIndex);
+
+        return currentIndex;
+    }
+    public static int moduloIndex(World world, int modulo)
+    {
+        PersistentDataContainer pdc = world.getPersistentDataContainer();
+
+        int currentIndex = pdc.getOrDefault(SavingPrivateRahya.PLUGIN.GAME_INDEX_KEY, PersistentDataType.INTEGER, 0);
+        return currentIndex % modulo;
+    }
 
     public void createVIPCage(World w, Location startCorner) {
 
@@ -86,7 +109,7 @@ public class WorldModifier
                     Block block = w.getBlockAt(x, y, z);
                     if (y == y0 + cageSize - 1 && boundaryCount == 1) {
                         //Roofing, transparent, ghastproof block.
-                        block.setType(Material.WAXED_COPPER_GRATE);
+                        block.setType(Material.COPPER_GRATE);
                     }
                     else if(y == y0 && boundaryCount == 1) {
                         //Flooring, standing on copper bars is a bad idea.
@@ -184,5 +207,33 @@ public class WorldModifier
         public Location getRelative(Location start, int width, int height) {
             return start.clone().add(width * xStep, height, width * zStep);
         }
+    }
+    public static List<Biome> getNonOceanBiomes()
+    {
+        var biomeRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME);
+        return biomeRegistry.stream()
+                .filter(biome -> {
+                    TypedKey<Biome> typedKey = TypedKey.create(RegistryKey.BIOME, biome.getKey());
+                    boolean isOcean = biomeRegistry.getTag(BiomeTagKeys.IS_OCEAN).contains(typedKey);
+                    boolean isBeach = biomeRegistry.getTag(BiomeTagKeys.IS_BEACH).contains(typedKey);
+                    boolean isRiver = biomeRegistry.getTag(BiomeTagKeys.IS_RIVER).contains(typedKey);
+
+                    if (isOcean || isBeach || isRiver) {
+                        return false;
+                    }
+                    return true;
+                })
+                .toList();
+    }
+    public static Location filterStartLocation(World overworld, Location toFilter)
+    {
+        var biomeList = getNonOceanBiomes();
+        Location anchor = toFilter;
+        BiomeSearchResult result = overworld.locateNearestBiome(anchor, 4000, biomeList.toArray(new Biome[0]));
+
+        if (result != null) {
+            toFilter = result.getLocation();
+        }
+        return toFilter;
     }
 }

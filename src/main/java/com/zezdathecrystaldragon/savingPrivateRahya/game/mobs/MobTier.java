@@ -48,17 +48,21 @@ public class MobTier
     public List<Entity> spawn(Location loc, int currentSegments) {
         ArrayList<Entity> spawned = new ArrayList<>();
         Entity last = null;
-        for (EntityType type : stack) {
-            Entity current = loc.getWorld().spawnEntity(loc, type);
-            spawned.add(current);
 
-            current.getPersistentDataContainer().set(MobManager.CUSTOM, PersistentDataType.BYTE, (byte) 1);
+        for (EntityType type : stack) {
+            Entity current = loc.getWorld().spawn(loc, type.getEntityClass(), entity -> {
+                entity.getPersistentDataContainer().set(MobManager.CUSTOM, PersistentDataType.BYTE, (byte) 1);
+            });
+
+            spawned.add(current);
 
             if (current instanceof LivingEntity living) {
                 behaviors.stream()
-                        .filter(b ->  b.minSegment() >= currentSegments)
+                        .filter(b -> b.minSegment() <= currentSegments) // Note: Should probably be <= if higher segments = harder?
                         .forEach(b -> b.action().accept(living));
-                living.getAttribute(Attribute.FOLLOW_RANGE).setBaseValue(64D);
+
+                var attr = living.getAttribute(Attribute.FOLLOW_RANGE);
+                if (attr != null) attr.setBaseValue(64D);
             }
 
             if (last != null) last.addPassenger(current);

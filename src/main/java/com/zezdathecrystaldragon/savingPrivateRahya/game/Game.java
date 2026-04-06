@@ -19,10 +19,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class Game
@@ -33,7 +30,7 @@ public class Game
     //TODO Make magic numbers configurable
     public final int vipDistance = 1500;
     public final int extractionZone = 64;
-    public final int extractionZoneBuffer = 8;
+    public final int extractionZoneBuffer = 16;
     public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
 
     public final int baseTime = 45*60;
@@ -44,7 +41,7 @@ public class Game
     private CountdownTask countdownTask;
     private NetherHeatTask heat;
     public final TitleManager titles = new TitleManager(this);
-    public WorldModifier wm = new WorldModifier(this);;
+    public WorldModifier wm;
     public final World overworld;
     public final World nether;
     public Game()
@@ -57,15 +54,15 @@ public class Game
                 .filter(w -> w.getEnvironment() == World.Environment.NETHER)
                 .findFirst()
                 .orElse(Bukkit.getWorlds().getFirst());
-        //overworld.setSpawnLocation(0, 72, 0);
-        gameCenter = overworld.getSpawnLocation();
+        this.gameCenter = Game.newGameCenter(overworld).add(0,2,0);
+        wm = new WorldModifier(this);
         for(Player p : Bukkit.getOnlinePlayers())
         {
             addParticipant(p);
-            p.teleportAsync(overworld.getSpawnLocation());
+            p.teleportAsync(this.gameCenter);
         }
         nether.getWorldBorder().setCenter(GameMath.netherify(nether, gameCenter).getBlockX(), GameMath.netherify(nether, gameCenter).getBlockZ());
-        nether.getWorldBorder().changeSize(vipDistance*3.0F, 1);
+        nether.getWorldBorder().setSize(vipDistance*3.0F);
         nether.setDifficulty(Difficulty.HARD);
         overworld.setDifficulty(Difficulty.HARD);
         try{
@@ -76,13 +73,12 @@ public class Game
         {
             SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "There's already a scoreboard objective named health, skipping");
         }
-
     }
 
     public Game newGame()
     {
         time.cancel();
-        if (heat != null) { // Add this guard
+        if (heat != null) {
             heat.cancel();
         }
         if (countdownTask != null) {
@@ -93,6 +89,7 @@ public class Game
         {
             player.setGameMode(GameMode.SPECTATOR);
         }
+
         return new Game();
     }
 
@@ -126,6 +123,7 @@ public class Game
             part.beginGame();
         }
         time.start();
+        overworld.setTime(0);
     }
 
     public void endGame(GameEndReason reason)
@@ -137,7 +135,14 @@ public class Game
         if(reason == GameEndReason.VIP_DIED || reason == GameEndReason.TIMER_EXHAUSTED)
         {
             currentState = GameState.DEFEAT;
-            titles.sendTitleToOnlineOneSecond(Component.text("The VIP has been slain!"));
+            if(reason == GameEndReason.VIP_DIED)
+            {
+                titles.sendTitleToOnlineOneSecond(Component.text("The VIP has been slain!"));
+            }
+            else
+            {
+                titles.sendTitleToOnlineOneSecond(Component.text("Time has been exhausted!"));
+            }
             time.cancel();
             for(Participant p : participants.values())
             {
@@ -145,7 +150,7 @@ public class Game
                 if(player == null)
                     continue;
 
-                player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_7, 1, 1);
+                player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1, 1);
 
                 if(p.isEliminated())
                     continue;
@@ -238,4 +243,25 @@ public class Game
     public TitleManager getTitles() {return titles;}
     public NetherHeatTask getHeat() {return heat;}
     public MobManager getMobs() {return mobs;}
+
+    public GameState getState() { return currentState;}
+
+    //Statics
+
+    public static Location newGameCenter(World overworld)
+    {
+        int index = WorldModifier.getAndIncrementGameIndex(overworld);
+
+        Location targetLocation;
+
+        if (index == 0) {
+            targetLocation = overworld.getSpawnLocation();
+            SavingPrivateRahya.PLUGIN.getLogger().info("Game #0: Using original world spawn.");
+        } else {
+            Location anchor = GameMath.getNewGameAnchor(overworld, index);
+            targetLocation = WorldModifier.filterStartLocation(overworld, anchor);
+            SavingPrivateRahya.PLUGIN.getLogger().info("Game #" + index + " initialized at sector anchor: " + anchor.getBlockX() + ", " + anchor.getBlockZ());
+        }
+        return overworld.getHighestBlockAt(targetLocation).getLocation();
+    }
 }

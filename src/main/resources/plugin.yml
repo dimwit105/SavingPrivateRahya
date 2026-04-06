@@ -12,6 +12,12 @@ commands:
   choosespawn:
     description: Decide where to spawn, either in the nether with VIP, or in the overworld
     usage: /choosespawn [nether|overworld]
+  glowme:
+    description: Gives you a glowing effect for 15 seconds.
+    usage: /glowme
   testsiege:
     description: spawns a mob to test siege ai
     usage: /testsiege
+  snowmanjoke:
+    description: aggros snow golems
+    usage: /snowmanjoke

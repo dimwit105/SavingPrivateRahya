@@ -37,6 +37,8 @@ public class RespawningParticipant extends ParticipantTask
         if(respawnTime == 0)
         {
             player.setGameMode(GameMode.SURVIVAL);
+            player.setSaturation(20F);
+            player.setFoodLevel(20);
             ItemUtil.giveNethersideCompass(participant);
             this.cancel();
         }

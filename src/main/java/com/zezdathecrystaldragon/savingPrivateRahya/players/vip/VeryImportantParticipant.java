@@ -16,6 +16,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.persistence.PersistentDataType;
 
 public class VeryImportantParticipant extends Participant
 {
@@ -46,15 +47,17 @@ public class VeryImportantParticipant extends Participant
     protected void giveStartingGear(SpawnLocation location)
     {
         super.giveStartingGear(location);
-        getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
 
-        NamespacedKey swordBuff = new NamespacedKey(SavingPrivateRahya.PLUGIN, "vipswordbuff");
+        if(SavingPrivateRahya.RAND.nextBoolean())
+            getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
+        else
+            getPlayer().getInventory().addItem(ItemStack.of(Material.SNOW_GOLEM_SPAWN_EGG, 3));
+
         ItemStack vipSword = new ItemStack(Material.GOLDEN_SWORD);
         Damageable swordMeta = (Damageable) vipSword.getItemMeta();
         swordMeta.setMaxDamage(12);
         swordMeta.setRarity(ItemRarity.EPIC);
         swordMeta.customName(Component.text(getPlayer().getName() + "'s last resort"));
-        //swordMeta.addAttributeModifier(Attribute.ATTACK_KNOCKBACK, new AttributeModifier(swordBuff, 12D, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND));
         swordMeta.addEnchant(Enchantment.KNOCKBACK, 10, true);
         vipSword.setItemMeta(swordMeta);
         getPlayer().getInventory().addItem(vipSword);

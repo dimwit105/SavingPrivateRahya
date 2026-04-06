@@ -6,7 +6,9 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 public class TimerTask extends CancellableRunnable
@@ -53,7 +55,6 @@ public class TimerTask extends CancellableRunnable
 
         if(secondsRemaining >= 0) {
             visualTimer.progress((float) secondsRemaining / (float) secondsMaximum);
-            this.segmentsRemaining = (int) Math.ceil(visualTimer.progress() * 6);
         }
         else{
             revampTimer();
@@ -70,10 +71,14 @@ public class TimerTask extends CancellableRunnable
         visualTimer.progress((float) Math.abs(secondsRemaining) / (Math.abs(maximumOvertime)));
         if(!revamped)
         {
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                player.playSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_ADDITIONS, 1, 1);
+            });
             visualTimer.name(Component.text("Impending doom approaches"));
             visualTimer.color(BossBar.Color.YELLOW);
             game.nether.getWorldBorder().changeSize(game.extractionZoneTotal, maximumOvertime * -20L);
             revamped = true;
+            game.getHeat().canQuickCool = false;
         }
     }
 
@@ -87,6 +92,25 @@ public class TimerTask extends CancellableRunnable
     {
         secondsRemaining -= amountToDamage;
         timeDamaged = true;
+    }
+    private void setSegmentsRemaining(boolean normalTime)
+    {
+        int preSetSegments = segmentsRemaining;
+        if(normalTime)
+        {
+            this.segmentsRemaining = (int) Math.ceil(visualTimer.progress() * 6);
+        }
+        else
+        {
+            this.segmentsRemaining = (int) (visualTimer.progress() * -6);
+        }
+        if(preSetSegments != segmentsRemaining && segmentsRemaining != 0)
+        {
+            Bukkit.getOnlinePlayers().forEach(player -> {
+                player.playSound(player, Sound.WEATHER_END_FLASH, 1, 1);
+            });
+        }
+
     }
     public double getTimerPercentage()
     {

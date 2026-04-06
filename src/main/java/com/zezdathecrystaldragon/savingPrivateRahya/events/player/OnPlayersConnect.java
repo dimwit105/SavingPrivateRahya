@@ -16,17 +16,17 @@ public class OnPlayersConnect implements Listener
         Game game = SavingPrivateRahya.PLUGIN.getGame();
         if(!game.getParticipants().containsKey(event.getPlayer().getUniqueId()))
         {
+            event.getPlayer().setGameMode(GameMode.SPECTATOR);
             if(game.isPreGame())
             {
                 game.addParticipant(event.getPlayer());
-                event.getPlayer().setGameMode(GameMode.SPECTATOR);
+                event.getPlayer().teleportAsync(game.gameCenter);
             }
             else
             {
-                event.getPlayer().kick(Component.text("Game is already in progress, sorry!"));
+                event.getPlayer().sendMessage("The game has already started, and you will not be able to participate, sorry!");
             }
         }
-
         game.getTime().onPlayerConnect(event.getPlayer());
     }
 }

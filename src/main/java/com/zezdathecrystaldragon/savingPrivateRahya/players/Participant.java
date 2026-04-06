@@ -89,18 +89,20 @@ public class Participant
     public void onRespawn(PlayerRespawnEvent event)
     {
         if(game.isPreGame() || game.getVip() == null)
-            return;
+        {
+            event.setRespawnLocation(game.gameCenter);
+        }
         if(respawning)
         {
             respawning = false;
             getPlayer().setGameMode(GameMode.SPECTATOR);
-            getPlayer().teleportAsync(game.getVip().getPlayer().getLocation());
+            event.setRespawnLocation(game.getVip().getPlayer().getLocation());
             addTask(new RespawningParticipant(this));
         }
         if(eliminated)
         {
             getPlayer().setGameMode(GameMode.SPECTATOR);
-            getPlayer().teleportAsync(eliminationLocation);
+            event.setRespawnLocation(eliminationLocation);
         }
     }
     public void onDisconnect(PlayerQuitEvent event)
@@ -120,6 +122,10 @@ public class Participant
     }
     public void beginGame()
     {
+        for(var modifiers : getPlayer().getAttribute(Attribute.MAX_HEALTH).getModifiers())
+        {
+            getPlayer().getAttribute(Attribute.MAX_HEALTH).removeModifier(modifiers);
+        }
         getPlayer().setHealth(getPlayer().getAttribute(Attribute.MAX_HEALTH).getValue());
         getPlayer().setFireTicks(0);
         getPlayer().setFoodLevel(20);
@@ -134,7 +140,7 @@ public class Participant
                 });
             }
             case OVERWORLD -> {
-                getPlayer().teleportAsync(game.overworld.getSpawnLocation()).thenAccept(tpd -> {
+                getPlayer().teleportAsync(game.gameCenter).thenAccept(tpd -> {
                     getPlayer().getInventory().clear();
                     giveStartingGear(spawnLocation);
                 });

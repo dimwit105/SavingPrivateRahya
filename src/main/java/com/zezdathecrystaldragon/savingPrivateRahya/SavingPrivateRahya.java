@@ -6,17 +6,23 @@ import com.zezdathecrystaldragon.savingPrivateRahya.events.EventManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.PiglinBrute;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowman;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
@@ -28,6 +34,8 @@ public final class SavingPrivateRahya extends JavaPlugin
 {
     private Game game;
     public static SavingPrivateRahya PLUGIN;
+    public final NamespacedKey GAME_INDEX_KEY = new NamespacedKey(this, "last_game_index");
+    public final NamespacedKey VIP_MOB = new NamespacedKey(this, "vip_mob");
     public static Random RAND = new Random();
     private FoliaLib foliaLib;
 
@@ -107,7 +115,24 @@ public final class SavingPrivateRahya extends JavaPlugin
         }
         if(cmd.getName().equals("testsiege") && sender instanceof Player player)
         {
-            new PiglinSiegeTask(game);
+            return true;
+        }
+        if (cmd.getName().equalsIgnoreCase("snowmanjoke")) {
+            Player player = (Player) sender;
+
+            player.getNearbyEntities(50, 50, 50).stream()
+                    .filter(e -> e instanceof Snowman)
+                    .map(e -> (Snowman) e)
+                    .forEach(s -> {
+                        s.setTarget(player);
+                        player.sendMessage("Sentry " + s.getEntityId() + " is now tracking you.");
+                    });
+        }
+        if(cmd.getName().equals("glowme") && sender instanceof Player player)
+        {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300,0));
+            player.sendMessage("Your friends can see you now!");
+            return true;
         }
         return false;
     }

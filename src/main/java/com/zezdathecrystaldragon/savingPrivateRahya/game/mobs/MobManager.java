@@ -2,6 +2,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.mobs;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.GameState;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.MobTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
@@ -26,6 +27,7 @@ public class MobManager
                     ws.getEquipment().setItemInMainHand(ItemStack.of(Material.BOW));
             }))),
             new MobTier(EntityType.BLAZE, 1),
+            new MobTier(EntityType.PIGLIN_BRUTE, 1),
             new MobTier(List.of(EntityType.SPIDER, EntityType.WITHER_SKELETON), 0, List.of(MobTier.MobBehavior.of(0, WitherSkeleton.class, ws -> {
                 if(SavingPrivateRahya.RAND.nextBoolean())
                     ws.getEquipment().setItemInMainHand(ItemStack.of(Material.BOW));
@@ -33,9 +35,9 @@ public class MobManager
             new MobTier(EntityType.PILLAGER, 0),
             new MobTier(EntityType.WITCH, 0),
             new MobTier(EntityType.VINDICATOR, -1),
-            new MobTier(EntityType.EVOKER, -2),
-            new MobTier(EntityType.RAVAGER, -3),
-            new MobTier(List.of(EntityType.CAVE_SPIDER, EntityType.CREEPER), -4),
+            new MobTier(EntityType.EVOKER, -3),
+            new MobTier(List.of(EntityType.CAVE_SPIDER, EntityType.CREEPER), -3),
+            new MobTier(EntityType.RAVAGER, -4),
             new MobTier(EntityType.WARDEN, -5));
 
 
@@ -84,6 +86,7 @@ public class MobManager
     {
         if(event.getEntity().getPersistentDataContainer().has(CUSTOM))
             return;
+        if (game.getState() != GameState.IN_PROGRESS) return;
 
         int segmentsRemaining = game.getTime().getSegmentsRemaining();
         if(SavingPrivateRahya.RAND.nextInt(Math.max(1, 7 + segmentsRemaining)) == 0)

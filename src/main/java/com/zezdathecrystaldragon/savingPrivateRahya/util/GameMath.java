@@ -4,6 +4,8 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 public class GameMath
 {
@@ -30,4 +32,27 @@ public class GameMath
         int netherZ = loc.getBlockZ() >> 3;
         return new Location(nether, netherX, Math.clamp(loc.getBlockY(), 12, 112), netherZ);
     }
+
+    public static Location getNewGameAnchor(World overworld, int gameIndex) {
+        int cellSize = 32000;
+
+        int k = (int) Math.ceil((Math.sqrt(gameIndex + 1) - 1) / 2);
+        int t = 2 * k;
+        int m = (int) Math.pow(t + 1, 2);
+        int x, z;
+
+        if (gameIndex >= m - t) {
+            x = k - (m - gameIndex); z = -k;
+        } else if (gameIndex >= m - 2 * t) {
+            x = -k; z = -k + (m - t - gameIndex);
+        } else if (gameIndex >= m - 3 * t) {
+            x = -k + (m - 2 * t - gameIndex); z = k;
+        } else {
+            x = k; z = k - (m - 3 * t - gameIndex);
+        }
+
+        return new Location(overworld, x * cellSize, 64, z * cellSize);
+    }
+
+
 }
