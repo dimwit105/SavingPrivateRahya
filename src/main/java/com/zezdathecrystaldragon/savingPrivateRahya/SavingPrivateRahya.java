@@ -9,6 +9,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeT
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
+import com.zezdathecrystaldragon.savingPrivateRahya.util.FourthChanceHook;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -36,6 +37,7 @@ public final class SavingPrivateRahya extends JavaPlugin
     public static SavingPrivateRahya PLUGIN;
     public final NamespacedKey GAME_INDEX_KEY = new NamespacedKey(this, "last_game_index");
     public final NamespacedKey VIP_MOB = new NamespacedKey(this, "vip_mob");
+    public static FourthChanceHook FOURTH_CHANCE = null;
     public static Random RAND = new Random();
     private FoliaLib foliaLib;
 
@@ -46,6 +48,9 @@ public final class SavingPrivateRahya extends JavaPlugin
         foliaLib = new FoliaLib(this);
         game = new Game();
         new EventManager();
+        if (getServer().getPluginManager().isPluginEnabled("FourthChance")) {
+            FOURTH_CHANCE = new FourthChanceHook();
+        }
     }
 
     @Override

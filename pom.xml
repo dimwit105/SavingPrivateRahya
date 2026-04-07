@@ -91,5 +91,10 @@
             <artifactId>triumph-gui</artifactId>
             <version>3.1.13</version>
         </dependency>
+        <dependency>
+            <groupId>com.zezdathecrystaldragon</groupId>
+            <artifactId>fourthchance</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

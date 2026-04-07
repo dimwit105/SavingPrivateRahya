@@ -7,6 +7,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.util.VIPTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.aura.VIPEffectAura;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.Enderwolf;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.shield.RegeneratingShieldTask;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -18,15 +19,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.annotation.Nullable;
+
 public class VeryImportantParticipant extends Participant
 {
+
     private final VIPEffectAura aura;
-    private final RegeneratingShieldTask shield;
+    private RegeneratingShieldTask shield;
+    private Enderwolf enderwolf = null;
     public VeryImportantParticipant(Participant p)
     {
         super(p);
         this.aura = new VIPEffectAura(this);
         this.shield = new RegeneratingShieldTask(this);
+        this.enderwolf = new Enderwolf(this);
         this.spawnLocation = SpawnLocation.NETHER;
     }
 
@@ -82,6 +88,18 @@ public class VeryImportantParticipant extends Participant
             }
         }
         return new Participant(this);
+    }
+    @Nullable
+    public Enderwolf getEnderwolf()
+    {
+        return enderwolf;
+    }
+
+    public void reconnect()
+    {
+        shield = shield.copy();
+        if(enderwolf != null)
+            enderwolf.reOwn();
     }
 
     public VIPEffectAura getAura() {return aura;}

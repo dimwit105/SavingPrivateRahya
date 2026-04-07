@@ -23,7 +23,7 @@ public class RegeneratingShieldTask extends VIPTask
     private final double BASE_DELAY = 60D;
     private final double BASE_RECHARGE_QUANTITY = 0.2D;
     private final double BASE_CAPACITY = 4D;
-    private final HashMap<String, ShieldModifier> modifiers = new HashMap<>();
+    private HashMap<String, ShieldModifier> modifiers = new HashMap<>();
     private int tickCounter = 0;
     private int effectiveDelay;
     private double effectiveCapacity;
@@ -41,6 +41,15 @@ public class RegeneratingShieldTask extends VIPTask
         tickCounter = effectiveDelay;
 
         setMaxAbsorption(effectiveCapacity);
+        vip.getPlayer().setAbsorptionAmount(effectiveCapacity);
+    }
+
+    @Override
+    public RegeneratingShieldTask copy()
+    {
+        var copy = new RegeneratingShieldTask(vip);
+        copy.modifiers = modifiers;
+        return copy;
     }
 
     @Override

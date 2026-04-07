@@ -12,4 +12,5 @@ public abstract class VIPTask extends ParticipantTask
     {
         this.cancel();
     }
+    public abstract VIPTask copy();
 }

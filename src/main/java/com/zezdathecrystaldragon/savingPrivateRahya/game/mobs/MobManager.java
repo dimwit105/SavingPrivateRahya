@@ -14,14 +14,19 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
 public class MobManager
 {
     public static final NamespacedKey CUSTOM = new NamespacedKey(SavingPrivateRahya.PLUGIN, "custom");
+    public static final NamespacedKey TRACKING = new NamespacedKey(SavingPrivateRahya.PLUGIN, "tracking");
+
     public final List<MobTier> bonusMobs = List.of(
-            new MobTier(EntityType.BREEZE, 2),
+            new MobTier(EntityType.BREEZE, 2, List.of(MobTier.MobBehavior.of(-2, Breeze.class, breeze -> {
+                breeze.getPersistentDataContainer().set(TRACKING, PersistentDataType.BOOLEAN, true);
+            }))),
             new MobTier(EntityType.WITHER_SKELETON, 1, List.of(MobTier.MobBehavior.of(1, WitherSkeleton.class, ws -> {
                 if(SavingPrivateRahya.RAND.nextBoolean())
                     ws.getEquipment().setItemInMainHand(ItemStack.of(Material.BOW));
@@ -34,7 +39,11 @@ public class MobManager
             }))),
             new MobTier(EntityType.PILLAGER, 0),
             new MobTier(EntityType.WITCH, 0),
+            new MobTier(EntityType.GHAST, 0, List.of(MobTier.MobBehavior.of(-2, Ghast.class, ghast -> {
+                ghast.getPersistentDataContainer().set(TRACKING, PersistentDataType.BOOLEAN, true);
+            }))),
             new MobTier(EntityType.VINDICATOR, -1),
+
             new MobTier(EntityType.EVOKER, -3),
             new MobTier(List.of(EntityType.CAVE_SPIDER, EntityType.CREEPER), -3),
             new MobTier(EntityType.RAVAGER, -4),
@@ -96,6 +105,7 @@ public class MobManager
                     .toList();
 
             if (eligible.isEmpty()) return;
+            event.setCancelled(true);
             MobTier chosen = eligible.get(SavingPrivateRahya.RAND.nextInt(eligible.size()));
             chosen.spawn(event.getLocation(), segmentsRemaining);
         }

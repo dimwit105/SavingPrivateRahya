@@ -1,11 +1,9 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events.entity;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.MobManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.HeatSeekingFireball;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Snowman;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -32,10 +30,10 @@ public class OnProjectileLaunch implements Listener
 
             SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(fireball, new HeatSeekingFireball(fireball, sm.getTarget(), 0.5F), 6, 1);
         }
-        if(event.getEntity().getShooter() instanceof Ghast gh && event.getEntity() instanceof Fireball fb)
+        if(event.getEntity().getShooter() instanceof Mob le && le.getPersistentDataContainer().has(MobManager.TRACKING))
         {
-            fb.setVelocity(fb.getVelocity().multiply(0.2F));
-            SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(fb, new HeatSeekingFireball(fb, gh.getTarget(), 0.5F), 6, 1);
+            event.getEntity().setVelocity(event.getEntity().getVelocity().multiply(0.33F));
+            SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(event.getEntity(), new HeatSeekingFireball(event.getEntity(), le.getTarget(), 0.5F), 8, 1);
         }
     }
 }

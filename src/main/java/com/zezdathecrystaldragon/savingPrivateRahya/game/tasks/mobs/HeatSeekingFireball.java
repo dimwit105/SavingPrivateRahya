@@ -36,7 +36,7 @@ public class HeatSeekingFireball extends CancellableRunnable
     @Override
     public void run()
     {
-        if(heatSeeker == null || target == null || !heatSeeker.isValid() || heatSeeker.isDead() || !target.isValid() || target.isDead() || heatSeeker.getVelocity().length() <= 0)
+        if(heatSeeker == null || target == null || !heatSeeker.isValid() || heatSeeker.isDead() || !target.isValid() || target.isDead() || heatSeeker.getVelocity().lengthSquared() <= 0)
         {
             this.cancel();
             return;

@@ -27,6 +27,10 @@ public class OnPlayersConnect implements Listener
                 event.getPlayer().sendMessage("The game has already started, and you will not be able to participate, sorry!");
             }
         }
+        else if(game.getVip().getID() == event.getPlayer().getUniqueId())
+        {
+            game.getVip().reconnect();
+        }
         game.getTime().onPlayerConnect(event.getPlayer());
     }
 }

@@ -51,14 +51,14 @@ public class MobTier
 
         for (EntityType type : stack) {
             Entity current = loc.getWorld().spawn(loc, type.getEntityClass(), entity -> {
-                entity.getPersistentDataContainer().set(MobManager.CUSTOM, PersistentDataType.BYTE, (byte) 1);
+                entity.getPersistentDataContainer().set(MobManager.CUSTOM, PersistentDataType.BOOLEAN, true);
             });
 
             spawned.add(current);
 
             if (current instanceof LivingEntity living) {
                 behaviors.stream()
-                        .filter(b -> b.minSegment() <= currentSegments) // Note: Should probably be <= if higher segments = harder?
+                        .filter(b -> b.minSegment() >= currentSegments)
                         .forEach(b -> b.action().accept(living));
 
                 var attr = living.getAttribute(Attribute.FOLLOW_RANGE);
