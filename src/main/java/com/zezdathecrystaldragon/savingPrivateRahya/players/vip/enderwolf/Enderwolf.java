@@ -2,8 +2,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
-import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.abilities.AbstractAbility;
-import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.abilities.EnderwolfAbility;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.abilities.*;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -24,6 +23,7 @@ public class Enderwolf
     private EnderwolfCooldownTask cooldownTask;
     private int respawnTime = 0;
     private int globalCooldown = 0;
+    @Nullable
     private Wolf enderWolf;
     private ArrayList<AbstractAbility> abilities = new ArrayList<>();
 
@@ -32,6 +32,16 @@ public class Enderwolf
         this.vip = vip;
         cooldownTask = new EnderwolfCooldownTask(vip, this);
         enderWolf = spawnWolf();
+        populateAbilities(SavingPrivateRahya.FOURTH_CHANCE != null);
+    }
+    private void populateAbilities(boolean fourthChanceEnabled)
+    {
+        abilities.add(new LavaSave(this, 300));
+        abilities.add(new VerySuspiciousStew(this, 90));
+        if(fourthChanceEnabled)
+        {
+            abilities.add(new ReviveDowned(this, 600));
+        }
     }
     @Nullable
     public Wolf getWolf()
@@ -51,7 +61,7 @@ public class Enderwolf
     }
     public void respawnWolf()
     {
-        if(respawnTime > 0 || enderWolf == null || vip.getPlayer() != null)
+        if(respawnTime > 0 || enderWolf != null || vip.getPlayer() == null)
             return;
         enderWolf = spawnWolf();
     }
@@ -63,8 +73,12 @@ public class Enderwolf
         getWolf().setSitting(false);
         getWolf().setOwner(p);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runLater(() -> {
-            if(getWolf() != null && vip.getPlayer() != null)
+            if(getWolf() != null && vip.getPlayer() != null){
+                getWolf().setSitting(false);
                 getWolf().setOwner(vip.getPlayer());
+                getWolf().teleport(vip.getPlayer());
+            }
+
         }, 300);
     }
     public void reOwn()
@@ -105,6 +119,10 @@ public class Enderwolf
     public int getGlobalCooldown()
     {
         return globalCooldown;
+    }
+    public void enterGlobalCooldown()
+    {
+        globalCooldown = 30;
     }
     public void cleanupAbilities()
     {

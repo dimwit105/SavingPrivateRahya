@@ -45,12 +45,13 @@ public class OnMobSpawn implements Listener
         }
         if(event.getEntity() instanceof IronGolem gm)
         {
+            gm.getAttribute(Attribute.FOLLOW_RANGE).setBaseValue(32D);
             gm.getAttribute(Attribute.ARMOR).setBaseValue(16D);
             gm.getAttribute(Attribute.ARMOR_TOUGHNESS).setBaseValue(16D);
-            gm.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(new NamespacedKey(SavingPrivateRahya.PLUGIN, "iron_golem_vip_boost"), 0.33D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-            gm.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(new AttributeModifier(new NamespacedKey(SavingPrivateRahya.PLUGIN, "iron_golem_vip_boost"), 0.33D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-            gm.getAttribute(Attribute.ATTACK_KNOCKBACK).addModifier(new AttributeModifier(new NamespacedKey(SavingPrivateRahya.PLUGIN, "iron_golem_vip_boost"), 1D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
-            gm.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(new NamespacedKey(SavingPrivateRahya.PLUGIN, "iron_golem_vip_boost"), -0.50D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
+            gm.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(new AttributeModifier(SavingPrivateRahya.PLUGIN.VIP_MOB, 0.33D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
+            gm.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(new AttributeModifier(SavingPrivateRahya.PLUGIN.VIP_MOB, 0.33D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
+            gm.getAttribute(Attribute.ATTACK_KNOCKBACK).addModifier(new AttributeModifier(SavingPrivateRahya.PLUGIN.VIP_MOB, 1D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
+            gm.getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(SavingPrivateRahya.PLUGIN.VIP_MOB, -0.50D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
             gm.getPersistentDataContainer().set(SavingPrivateRahya.PLUGIN.VIP_MOB, PersistentDataType.BOOLEAN, true);
 
         }

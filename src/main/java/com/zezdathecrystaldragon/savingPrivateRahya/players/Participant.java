@@ -7,7 +7,6 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.tasks.RespawningParticipant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.ItemUtil;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
@@ -15,14 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class Participant
@@ -107,7 +103,7 @@ public class Participant
     }
     public void onDisconnect(PlayerQuitEvent event)
     {
-        cancelAllTasks();
+        cleanupParticipant();
     }
 
     /**
@@ -174,7 +170,7 @@ public class Participant
     {
         tasks.remove(task);
     }
-    public void cancelAllTasks()
+    public void cleanupParticipant()
     {
         for (ParticipantTask task : new ArrayList<>(tasks))
         {

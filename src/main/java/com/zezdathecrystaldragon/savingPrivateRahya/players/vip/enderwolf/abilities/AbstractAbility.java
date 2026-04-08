@@ -18,10 +18,11 @@ public abstract class AbstractAbility implements EnderwolfAbility
     public void enterCooldown()
     {
         cooldown = maxCooldown;
+        enderwolf.enterGlobalCooldown();
     }
     public boolean isReady()
     {
-        return cooldown <= 0 && enderwolf.getGlobalCooldown() <= 0;
+        return cooldown <= 0 && enderwolf.getGlobalCooldown() <= 0 && enderwolf.getWolf() != null;
     }
     public void decrementCooldown()
     {

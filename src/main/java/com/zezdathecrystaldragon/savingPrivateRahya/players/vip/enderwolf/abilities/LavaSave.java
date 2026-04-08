@@ -20,7 +20,7 @@ public class LavaSave extends AbstractAbility
     @EventHandler
     public void onLavaDamage(EntityDamageEvent event)
     {
-        if(event.getCause() != EntityDamageEvent.DamageCause.LAVA || enderwolf == null)
+        if(event.getCause() != EntityDamageEvent.DamageCause.LAVA)
             return;
         if(!isReady())
             return;

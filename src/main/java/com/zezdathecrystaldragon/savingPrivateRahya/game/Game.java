@@ -24,9 +24,9 @@ import java.util.logging.Level;
 
 public class Game
 {
-    HashMap<UUID, Participant> participants = new HashMap<UUID, Participant>();
-    VeryImportantParticipant vip;
-    GameState currentState = GameState.LOBBY;
+    private HashMap<UUID, Participant> participants = new HashMap<UUID, Participant>();
+    private VeryImportantParticipant vip;
+    private GameState currentState = GameState.LOBBY;
     //TODO Make magic numbers configurable
     public final int vipDistance = 1500;
     public final int extractionZone = 64;
@@ -40,7 +40,7 @@ public class Game
     private final MobManager mobs = new MobManager(this);
     private CountdownTask countdownTask;
     private NetherHeatTask heat;
-    public final TitleManager titles = new TitleManager(this);
+    private final TitleManager titles = new TitleManager(this);
     public WorldModifier wm;
     public final World overworld;
     public final World nether;
@@ -202,7 +202,7 @@ public class Game
     {
         for(Participant p : participants.values())
         {
-            p.cancelAllTasks();
+            p.cleanupParticipant();
         }
         participants.clear();
     }

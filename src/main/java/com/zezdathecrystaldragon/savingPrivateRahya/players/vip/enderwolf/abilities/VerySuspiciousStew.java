@@ -23,17 +23,21 @@ public class VerySuspiciousStew extends AbstractAbility
     private final int bigEffectDuration = 120*20;
     private final List<SuspiciousEffectEntry> effects = List.of(
             SuspiciousEffectEntry.create(PotionEffectType.STRENGTH, smallEffectDuration),
+            SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, smallEffectDuration),
+
             SuspiciousEffectEntry.create(PotionEffectType.REGENERATION, bigEffectDuration),
-            SuspiciousEffectEntry.create(PotionEffectType.BLINDNESS, smallEffectDuration),
-            SuspiciousEffectEntry.create(PotionEffectType.HUNGER, bigEffectDuration),
-            SuspiciousEffectEntry.create(PotionEffectType.SATURATION, bigEffectDuration),
             SuspiciousEffectEntry.create(PotionEffectType.WITHER, bigEffectDuration),
             SuspiciousEffectEntry.create(PotionEffectType.POISON, bigEffectDuration),
+
+            SuspiciousEffectEntry.create(PotionEffectType.HUNGER, bigEffectDuration),
+            SuspiciousEffectEntry.create(PotionEffectType.SATURATION, bigEffectDuration),
+
+            SuspiciousEffectEntry.create(PotionEffectType.BLINDNESS, smallEffectDuration),
+
             SuspiciousEffectEntry.create(PotionEffectType.RESISTANCE, smallEffectDuration),
             SuspiciousEffectEntry.create(PotionEffectType.ABSORPTION, smallEffectDuration),
             SuspiciousEffectEntry.create(PotionEffectType.FIRE_RESISTANCE, bigEffectDuration),
-            SuspiciousEffectEntry.create(PotionEffectType.SPEED, smallEffectDuration),
-            SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, smallEffectDuration)
+            SuspiciousEffectEntry.create(PotionEffectType.SPEED, smallEffectDuration)
     );
     public VerySuspiciousStew(Enderwolf wolf, int cooldown)
     {
@@ -43,11 +47,9 @@ public class VerySuspiciousStew extends AbstractAbility
     @EventHandler
     public void exhaustEvent(EntityExhaustionEvent event)
     {
-        Wolf eWolf = enderwolf.getWolf();
-        if(eWolf == null)
-            return;
         if(!isReady())
             return;
+        Wolf eWolf = enderwolf.getWolf();
         if(event.getEntity() instanceof Player p && p.getFoodLevel() <= 10 && p.getWorld() == eWolf.getWorld())
         {
             enderwolf.tempOwner(p);

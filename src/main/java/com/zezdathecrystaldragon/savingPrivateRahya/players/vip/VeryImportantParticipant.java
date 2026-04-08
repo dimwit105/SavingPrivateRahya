@@ -32,7 +32,6 @@ public class VeryImportantParticipant extends Participant
         super(p);
         this.aura = new VIPEffectAura(this);
         this.shield = new RegeneratingShieldTask(this);
-        this.enderwolf = new Enderwolf(this);
         this.spawnLocation = SpawnLocation.NETHER;
     }
 
@@ -54,10 +53,7 @@ public class VeryImportantParticipant extends Participant
     {
         super.giveStartingGear(location);
 
-        if(SavingPrivateRahya.RAND.nextBoolean())
-            getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
-        else
-            getPlayer().getInventory().addItem(ItemStack.of(Material.SNOW_GOLEM_SPAWN_EGG, 3));
+        chooseMobAlly();
 
         ItemStack vipSword = new ItemStack(Material.GOLDEN_SWORD);
         Damageable swordMeta = (Damageable) vipSword.getItemMeta();
@@ -88,6 +84,27 @@ public class VeryImportantParticipant extends Participant
             }
         }
         return new Participant(this);
+    }
+    private void chooseMobAlly()
+    {
+        switch (SavingPrivateRahya.RAND.nextInt(3))
+        {
+            case 0:
+                getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
+                break;
+            case 1:
+                getPlayer().getInventory().addItem(ItemStack.of(Material.SNOW_GOLEM_SPAWN_EGG, 3));
+                break;
+            case 2:
+                enderwolf = new Enderwolf(this);
+        }
+    }
+    @Override
+    public void cleanupParticipant()
+    {
+        super.cleanupParticipant();
+        if(enderwolf != null)
+            enderwolf.cleanupAbilities();
     }
     @Nullable
     public Enderwolf getEnderwolf()

@@ -5,20 +5,14 @@ import com.tcoded.folialib.wrapper.task.WrappedTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.EventManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.FourthChanceHook;
-import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.PiglinBrute;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowman;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,7 +52,7 @@ public final class SavingPrivateRahya extends JavaPlugin
     {
         for(Participant part : game.getParticipants().values())
         {
-            part.cancelAllTasks();
+            part.cleanupParticipant();
         }
         foliaLib.getScheduler().cancelAllTasks();
     }
