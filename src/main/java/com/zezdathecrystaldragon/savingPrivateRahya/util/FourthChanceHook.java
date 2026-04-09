@@ -11,6 +11,10 @@ public class FourthChanceHook
     private DownedPlayerManager downedPlayerManager;
     public FourthChanceHook()
     {
+        grabService();
+    }
+    private void grabService()
+    {
         RegisteredServiceProvider<DownedPlayerManager> rsp =
                 Bukkit.getServer().getServicesManager().getRegistration(DownedPlayerManager.class);
         if (rsp != null) {
@@ -19,6 +23,8 @@ public class FourthChanceHook
     }
     public boolean isDowned(Player p)
     {
+        if(downedPlayerManager == null)
+            grabService();
         return downedPlayerManager.isDowned(p);
     }
 

@@ -16,6 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 public class Enderwolf
 {
@@ -31,6 +32,7 @@ public class Enderwolf
     {
         this.vip = vip;
         cooldownTask = new EnderwolfCooldownTask(vip, this);
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(vip.getPlayer(), cooldownTask, 0, 20);
         enderWolf = spawnWolf();
         populateAbilities(SavingPrivateRahya.FOURTH_CHANCE != null);
     }
@@ -53,8 +55,9 @@ public class Enderwolf
 
     public void wolfDied(EntityDeathEvent event)
     {
-        getWolf().teleport(new Location(getWolf().getWorld(), 0, 500, 0));
-        getWolf().getWorld().playSound(getWolf().getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+        Location deathspot = getWolf().getLocation();
+        getWolf().remove();
+        deathspot.getWorld().playSound(deathspot, Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
         event.setShouldPlayDeathSound(false);
         respawnTime = 90;
         enderWolf = null;
@@ -64,11 +67,12 @@ public class Enderwolf
         if(respawnTime > 0 || enderWolf != null || vip.getPlayer() == null)
             return;
         enderWolf = spawnWolf();
+        vip.getPlayer().getWorld().playSound(vip.getPlayer().getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
     }
 
     public void tempOwner(Player p)
     {
-        if(enderWolf == null)
+        if(enderWolf == null || p == vip.getPlayer())
             return;
         getWolf().setSitting(false);
         getWolf().setOwner(p);
@@ -96,6 +100,7 @@ public class Enderwolf
             globalCooldown--;
         if(respawnTime > 0)
             respawnTime--;
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Global cooldown: %d, Respawn time: %d", globalCooldown, respawnTime));
         respawnWolf();
         for(AbstractAbility ability : abilities)
         {
@@ -126,6 +131,7 @@ public class Enderwolf
     }
     public void cleanupAbilities()
     {
+        cooldownTask.cancel();
         for(AbstractAbility ability : abilities)
         {
             ability.remove();

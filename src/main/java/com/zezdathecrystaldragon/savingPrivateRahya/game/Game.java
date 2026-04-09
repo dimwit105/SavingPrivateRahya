@@ -258,9 +258,18 @@ public class Game
             targetLocation = overworld.getSpawnLocation();
             SavingPrivateRahya.PLUGIN.getLogger().info("Game #0: Using original world spawn.");
         } else {
-            Location anchor = GameMath.getNewGameAnchor(overworld, index);
-            targetLocation = WorldModifier.filterStartLocation(overworld, anchor);
-            SavingPrivateRahya.PLUGIN.getLogger().info("Game #" + index + " initialized at sector anchor: " + anchor.getBlockX() + ", " + anchor.getBlockZ());
+            Location anchor = null;
+            targetLocation = null;
+            while (targetLocation == null)
+            {
+                anchor = GameMath.getNewGameAnchor(overworld, index);
+                targetLocation = WorldModifier.filterStartLocation(overworld, anchor);
+                if(targetLocation == null)
+                {
+                    index = WorldModifier.getAndIncrementGameIndex(overworld);
+                }
+            }
+            SavingPrivateRahya.PLUGIN.getLogger().info("Index #" + index + " initialized at sector anchor: " + anchor.getBlockX() + ", " + anchor.getBlockZ());
         }
         return overworld.getHighestBlockAt(targetLocation).getLocation();
     }

@@ -28,6 +28,9 @@ public class ReviveDowned extends AbstractAbility
             return;
         if(!SavingPrivateRahya.FOURTH_CHANCE.isDowned(player))
             return;
+        if (player.getHealth() - event.getFinalDamage() <= 0 && !SavingPrivateRahya.FOURTH_CHANCE.isDowned(player)) {
+            return;
+        }
         double healthPercentage = player.getHealth() / player.getAttribute(Attribute.MAX_HEALTH).getValue();
         if(SavingPrivateRahya.RAND.nextDouble() > healthPercentage / 2 + 0.81666666F)
             return;
@@ -41,7 +44,7 @@ public class ReviveDowned extends AbstractAbility
         int duration = 60*20;
         float radius = 3F;
         aec.addCustomEffect(PotionEffectType.REGENERATION.createEffect(duration, 0), true);
-        aec.setReapplicationDelay(Integer.MAX_VALUE);
+        aec.setReapplicationDelay(duration * 3);
         aec.setDuration(duration);
         aec.setDurationOnUse(0);
         aec.setRadius(3F);

@@ -38,7 +38,6 @@ public class NetherHeatTask extends CancellableRunnable
     @Override
     public void run()
     {
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Nether heat is %d of %d", heat, heatEffectsStarting));
         if(coolingTimer > coolingThreshold)
         {
             if(canQuickCool)

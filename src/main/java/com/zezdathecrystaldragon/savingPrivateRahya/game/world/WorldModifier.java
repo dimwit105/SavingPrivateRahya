@@ -217,8 +217,10 @@ public class WorldModifier
                     boolean isOcean = biomeRegistry.getTag(BiomeTagKeys.IS_OCEAN).contains(typedKey);
                     boolean isBeach = biomeRegistry.getTag(BiomeTagKeys.IS_BEACH).contains(typedKey);
                     boolean isRiver = biomeRegistry.getTag(BiomeTagKeys.IS_RIVER).contains(typedKey);
+                    boolean isUnderground = (biome == Biome.LUSH_CAVES || biome == Biome.DRIPSTONE_CAVES || biome == Biome.DEEP_DARK);
+                    boolean otherForbidden = biome == Biome.STONY_SHORE;
 
-                    if (isOcean || isBeach || isRiver) {
+                    if (isOcean || isBeach || isRiver || isUnderground || otherForbidden) {
                         return false;
                     }
                     return true;
@@ -228,12 +230,12 @@ public class WorldModifier
     public static Location filterStartLocation(World overworld, Location toFilter)
     {
         var biomeList = getNonOceanBiomes();
-        Location anchor = toFilter;
-        BiomeSearchResult result = overworld.locateNearestBiome(anchor, 4000, biomeList.toArray(new Biome[0]));
+        BiomeSearchResult result = overworld.locateNearestBiome(toFilter, 4000, biomeList.toArray(new Biome[0]));
 
         if (result != null) {
-            toFilter = result.getLocation();
+            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Biome result: %s, Location: %s", result.getBiome().getKey().asString(), result.getLocation()));
+            return result.getLocation();
         }
-        return toFilter;
+        return null;
     }
 }

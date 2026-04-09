@@ -15,7 +15,7 @@ public class OnPlayerDamaged implements Listener
         Game game = SavingPrivateRahya.PLUGIN.getGame();
         if(event.getEntity() instanceof Player p)
         {
-            if(game.getVip() != null && game.getVip().getPlayer() == p && event.getFinalDamage() > 0)
+            if(game.getVip() != null && game.getVip().getPlayer() == p && (event.getFinalDamage() > 0 || event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION) > 0))
             {
                 game.getVip().getShield().takeHit();
             }

@@ -87,6 +87,7 @@ public class Participant
         if(game.isPreGame() || game.getVip() == null)
         {
             event.setRespawnLocation(game.gameCenter);
+            return;
         }
         if(respawning)
         {
@@ -127,6 +128,7 @@ public class Participant
         getPlayer().setFoodLevel(20);
         getPlayer().setSaturation(5);
         getPlayer().clearActivePotionEffects();
+        getPlayer().addPotionEffect(PotionEffectType.SLOW_FALLING.createEffect(300,0));
         switch (spawnLocation)
         {
             case NETHER -> {
@@ -151,7 +153,7 @@ public class Participant
             startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
             getPlayer().getInventory().addItem(startingPickaxe);
             getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
-            getPlayer().getInventory().addItem(ItemStack.of(Material.NETHERRACK, 32));
+            getPlayer().getInventory().addItem(ItemStack.of(Material.BLACKSTONE, 32));
             getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
         }
         ItemUtil.giveNethersideCompass(this);

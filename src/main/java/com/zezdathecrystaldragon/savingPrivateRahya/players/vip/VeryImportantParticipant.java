@@ -87,6 +87,7 @@ public class VeryImportantParticipant extends Participant
     }
     private void chooseMobAlly()
     {
+        /*
         switch (SavingPrivateRahya.RAND.nextInt(3))
         {
             case 0:
@@ -98,6 +99,8 @@ public class VeryImportantParticipant extends Participant
             case 2:
                 enderwolf = new Enderwolf(this);
         }
+         */
+        enderwolf = new Enderwolf(this);
     }
     @Override
     public void cleanupParticipant()
