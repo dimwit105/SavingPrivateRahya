@@ -17,7 +17,7 @@ public class TimerTask extends CancellableRunnable
     int secondsRemaining;
     int secondsMaximum;
     int maximumOvertime;
-    int segmentsRemaining = 6;
+    private int segmentsRemaining = 6;
     public static final NamespacedKey TIMER_BAR = new NamespacedKey(SavingPrivateRahya.PLUGIN, "timer_bar");
     final Component name = Component.text("Nether Stability");
     BossBar visualTimer;
@@ -53,12 +53,15 @@ public class TimerTask extends CancellableRunnable
         else
             visualTimer.color(revamped ? BossBar.Color.YELLOW : BossBar.Color.WHITE);
 
-        if(secondsRemaining >= 0) {
+        if(secondsRemaining >= 0)
+        {
             visualTimer.progress((float) secondsRemaining / (float) secondsMaximum);
+            setSegmentsRemaining(true);
         }
-        else{
+        else
+        {
             revampTimer();
-            this.segmentsRemaining = (int) (visualTimer.progress() * -6);
+            setSegmentsRemaining(false);
         }
         if(secondsRemaining <= maximumOvertime)
         {
@@ -72,7 +75,7 @@ public class TimerTask extends CancellableRunnable
         if(!revamped)
         {
             Bukkit.getOnlinePlayers().forEach(player -> {
-                player.playSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_ADDITIONS, 1, 1);
+                player.playSound(player, Sound.AMBIENT_CAVE, 1, 1);
             });
             visualTimer.name(Component.text("Impending doom approaches"));
             visualTimer.color(BossBar.Color.YELLOW);
@@ -110,7 +113,6 @@ public class TimerTask extends CancellableRunnable
                 player.playSound(player, Sound.WEATHER_END_FLASH, 1, 1);
             });
         }
-
     }
     public double getTimerPercentage()
     {

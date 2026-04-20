@@ -1,11 +1,9 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.abilities;
 
-import com.zezdathecrystaldragon.fourthChance.events.PlayerDownedEvent;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.Enderwolf;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.AreaEffectCloud;
-import org.bukkit.entity.LingeringPotion;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
@@ -22,7 +20,7 @@ public class ReviveDowned extends AbstractAbility
     @EventHandler
     public void onDownedPlayerDamaged(EntityDamageEvent event)
     {
-        if(!isReady())
+        if(onCooldown())
             return;
         if(!(event.getEntity() instanceof Player player))
             return;
@@ -35,7 +33,7 @@ public class ReviveDowned extends AbstractAbility
         if(SavingPrivateRahya.RAND.nextDouble() > healthPercentage / 2 + 0.81666666F)
             return;
 
-        Wolf ewolf = enderwolf.getWolf();
+        Wolf ewolf = enderwolf.getWolf().orElseThrow();
 
         ewolf.teleport(player);
         enderwolf.tempOwner(player);

@@ -10,13 +10,12 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.RenderType;
+import org.bukkit.entity.SpawnCategory;
+import org.bukkit.scoreboard.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -24,6 +23,9 @@ import java.util.logging.Level;
 
 public class Game
 {
+    public static final String OVERWORLD_TEAM_NAME = "Overworld";
+    public static final String NETHER_TEAM_NAME = "Nether";
+    public static final String VIP_TEAM_NAME = "VIP";
     private HashMap<UUID, Participant> participants = new HashMap<UUID, Participant>();
     private VeryImportantParticipant vip;
     private GameState currentState = GameState.LOBBY;
@@ -33,11 +35,11 @@ public class Game
     public final int extractionZoneBuffer = 16;
     public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
 
-    public final int baseTime = 45*60;
+    public final int baseTime = 6*60;
     public final Location gameCenter;
 
     private final TimerTask time = new TimerTask(this, baseTime);
-    private final MobManager mobs = new MobManager(this);
+    private MobManager mobs;
     private CountdownTask countdownTask;
     private NetherHeatTask heat;
     private final TitleManager titles = new TitleManager(this);
@@ -56,6 +58,7 @@ public class Game
                 .orElse(Bukkit.getWorlds().getFirst());
         this.gameCenter = Game.newGameCenter(overworld).add(0,2,0);
         wm = new WorldModifier(this);
+        mobs = new MobManager(this);
         for(Player p : Bukkit.getOnlinePlayers())
         {
             addParticipant(p);
@@ -64,6 +67,7 @@ public class Game
         nether.getWorldBorder().setCenter(GameMath.netherify(nether, gameCenter).getBlockX(), GameMath.netherify(nether, gameCenter).getBlockZ());
         nether.getWorldBorder().setSize(vipDistance*3.0F);
         nether.setDifficulty(Difficulty.HARD);
+        nether.setSpawnLimit(SpawnCategory.MONSTER, 100);
         overworld.setDifficulty(Difficulty.HARD);
         try{
             Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().registerNewObjective("Health", Criteria.HEALTH, Component.text("health"), RenderType.HEARTS);
@@ -73,10 +77,18 @@ public class Game
         {
             SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "There's already a scoreboard objective named health, skipping");
         }
+        try{
+            setupTeams();
+        }
+        catch (IllegalArgumentException e)
+        {
+            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Teams are already setup!");
+        }
     }
 
     public Game newGame()
     {
+        currentState = GameState.CANCELLED;
         time.cancel();
         if (heat != null) {
             heat.cancel();
@@ -89,7 +101,7 @@ public class Game
         {
             player.setGameMode(GameMode.SPECTATOR);
         }
-
+        mobs.resetNaturalSpawns();
         return new Game();
     }
 
@@ -124,6 +136,7 @@ public class Game
         }
         time.start();
         overworld.setTime(0);
+        overworld.setClearWeatherDuration(5*60*20);
     }
 
     public void endGame(GameEndReason reason)
@@ -146,9 +159,9 @@ public class Game
             time.cancel();
             for(Participant p : participants.values())
             {
-                Player player = p.getPlayer();
-                if(player == null)
+                if(p.getPlayer().isEmpty())
                     continue;
+                Player player = p.getPlayer().get();
 
                 player.playSound(player.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1, 1);
 
@@ -230,10 +243,9 @@ public class Game
      * Gets the VIP, can be null if the game is not started
      * @return the VIP
      */
-    @Nullable
-    public VeryImportantParticipant getVip()
+    public Optional<VeryImportantParticipant> getVip()
     {
-        return vip;
+        return Optional.ofNullable(vip);
     }
     public final Map<UUID, Participant> getParticipants()
     {
@@ -272,5 +284,20 @@ public class Game
             SavingPrivateRahya.PLUGIN.getLogger().info("Index #" + index + " initialized at sector anchor: " + anchor.getBlockX() + ", " + anchor.getBlockZ());
         }
         return overworld.getHighestBlockAt(targetLocation).getLocation();
+    }
+    public static void setupTeams()
+    {
+        Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+        for(Team team : board.getTeams())
+        {
+            team.removeEntries(team.getEntries());
+        }
+        Team overworldTeam = board.registerNewTeam(OVERWORLD_TEAM_NAME);
+        Team netherTeam = board.registerNewTeam(NETHER_TEAM_NAME);
+        Team vipTeam = board.registerNewTeam(VIP_TEAM_NAME);
+
+        overworldTeam.color(NamedTextColor.AQUA);
+        netherTeam.color(NamedTextColor.RED);
+        vipTeam.color(NamedTextColor.YELLOW);
     }
 }

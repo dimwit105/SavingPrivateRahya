@@ -1,6 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players.vip;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameEndReason;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.SpawnLocation;
@@ -10,6 +11,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.aura.VIPEffectAu
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.Enderwolf;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.shield.RegeneratingShieldTask;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -18,8 +20,12 @@ import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scoreboard.Scoreboard;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Optional;
 
 public class VeryImportantParticipant extends Participant
 {
@@ -33,6 +39,7 @@ public class VeryImportantParticipant extends Participant
         this.aura = new VIPEffectAura(this);
         this.shield = new RegeneratingShieldTask(this);
         this.spawnLocation = SpawnLocation.NETHER;
+        handleTeam();
     }
 
     /**
@@ -52,6 +59,9 @@ public class VeryImportantParticipant extends Participant
     protected void giveStartingGear(SpawnLocation location)
     {
         super.giveStartingGear(location);
+        if(getPlayer().isEmpty())
+            return;
+        var player = getPlayer().get();
 
         chooseMobAlly();
 
@@ -59,10 +69,10 @@ public class VeryImportantParticipant extends Participant
         Damageable swordMeta = (Damageable) vipSword.getItemMeta();
         swordMeta.setMaxDamage(12);
         swordMeta.setRarity(ItemRarity.EPIC);
-        swordMeta.customName(Component.text(getPlayer().getName() + "'s last resort"));
+        swordMeta.customName(Component.text(player.getName() + "'s last resort"));
         swordMeta.addEnchant(Enchantment.KNOCKBACK, 10, true);
         vipSword.setItemMeta(swordMeta);
-        getPlayer().getInventory().addItem(vipSword);
+        player.getInventory().addItem(vipSword);
     }
     @Override
     public void onDeath(PlayerDeathEvent event)
@@ -76,10 +86,8 @@ public class VeryImportantParticipant extends Participant
 
     public Participant unVIP()
     {
-        for(ParticipantTask task : tasks)
-        {
-            if(task instanceof VIPTask vipTask)
-            {
+        for (ParticipantTask task : new ArrayList<>(tasks)) {
+            if (task instanceof VIPTask vipTask) {
                 vipTask.onDemote();
             }
         }
@@ -87,20 +95,26 @@ public class VeryImportantParticipant extends Participant
     }
     private void chooseMobAlly()
     {
-        /*
+        if(getPlayer().isEmpty())
+            return;
+        var player = getPlayer().get();
         switch (SavingPrivateRahya.RAND.nextInt(3))
         {
             case 0:
-                getPlayer().getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
+                player.getInventory().addItem(ItemStack.of(Material.IRON_GOLEM_SPAWN_EGG, 3));
                 break;
             case 1:
-                getPlayer().getInventory().addItem(ItemStack.of(Material.SNOW_GOLEM_SPAWN_EGG, 3));
+                player.getInventory().addItem(ItemStack.of(Material.SNOW_GOLEM_SPAWN_EGG, 3));
                 break;
             case 2:
                 enderwolf = new Enderwolf(this);
         }
-         */
-        enderwolf = new Enderwolf(this);
+    }
+    @Override
+    public void handleTeam()
+    {
+        Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+        board.getTeam(Game.VIP_TEAM_NAME).addPlayer(Bukkit.getOfflinePlayer(getID()));
     }
     @Override
     public void cleanupParticipant()
@@ -109,10 +123,9 @@ public class VeryImportantParticipant extends Participant
         if(enderwolf != null)
             enderwolf.cleanupAbilities();
     }
-    @Nullable
-    public Enderwolf getEnderwolf()
+    public Optional<Enderwolf> getEnderwolf()
     {
-        return enderwolf;
+        return Optional.ofNullable(enderwolf);
     }
 
     public void reconnect()

@@ -5,14 +5,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask
 import com.zezdathecrystaldragon.savingPrivateRahya.util.ItemUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemRarity;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.CompassMeta;
-
-import java.util.List;
 
 public class RespawningParticipant extends ParticipantTask
 {
@@ -21,7 +14,7 @@ public class RespawningParticipant extends ParticipantTask
     public RespawningParticipant(Participant participant)
     {
         super(participant);
-        this.player = participant.getPlayer();
+        this.player = participant.getPlayer().orElseThrow();
     }
 
     @Override

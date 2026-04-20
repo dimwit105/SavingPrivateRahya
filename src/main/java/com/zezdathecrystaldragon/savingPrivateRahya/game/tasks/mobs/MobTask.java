@@ -60,9 +60,13 @@ public abstract class MobTask extends CancellableRunnable
         ArrayList<Player> potentialTargets = new ArrayList<>();
         for(Participant part : game.getParticipants().values())
         {
-            if(part.getPlayer() == null || part.getPlayer().getWorld() != world || part.isEliminated())
+            if(part.isEliminated())
                 continue;
-            potentialTargets.add(part.getPlayer());
+            part.getPlayer().ifPresent(player -> {
+                if(player.getWorld() != world)
+                    return;
+                potentialTargets.add(player);
+            });
         }
         if(potentialTargets.isEmpty())
             return null;

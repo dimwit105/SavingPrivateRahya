@@ -11,6 +11,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.util.FourthChanceHook;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -40,6 +41,9 @@ public final class SavingPrivateRahya extends JavaPlugin
     {
         PLUGIN = this;
         foliaLib = new FoliaLib(this);
+        for(OfflinePlayer op : Bukkit.getOfflinePlayers())
+        {
+        }
         game = new Game();
         new EventManager();
         if (getServer().getPluginManager().isPluginEnabled("FourthChance")) {
@@ -54,11 +58,19 @@ public final class SavingPrivateRahya extends JavaPlugin
         {
             part.cleanupParticipant();
         }
+        game.getMobs().resetNaturalSpawns();
         foliaLib.getScheduler().cancelAllTasks();
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args)
     {
+        if(cmd.getName().equals("glowme") && sender instanceof Player player)
+        {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300,0));
+            player.sendMessage("Your friends can see you now!");
+            return true;
+        }
+
         if(args.length == 0){
             sender.sendMessage("We need some arguments bruv");
             return false;}
@@ -95,17 +107,23 @@ public final class SavingPrivateRahya extends JavaPlugin
         {
             if(sender instanceof Player p)
             {
-                String spawn = args[0];
+                String spawn = args[0].toUpperCase();
                 Participant part = game.getParticipants().get(p.getUniqueId());
                 try
                 {
                     SpawnLocation where = SpawnLocation.valueOf(spawn);
-                    Bukkit.broadcast(Component.text(String.format("%s has chose to spawn in the %s", sender.getName(), spawn.toLowerCase())));
-                    return part.electSpawn(where);
+                    boolean result = part.electSpawn(where);
+                    Bukkit.broadcast(p.teamDisplayName().append(Component.text(String.format(" has chosen to spawn in the %s", spawn.toLowerCase()))));
+                    return result;
                 }
                 catch (IllegalArgumentException e)
                 {
                     sender.sendMessage("Thats not a valid place to spawn doofus. Try NETHER or OVERWORLD");
+                    return false;
+                }
+                catch (NullPointerException e)
+                {
+                    sender.sendMessage("Sorry! You are not a participant right now, please wait for a new game!");
                     return false;
                 }
             }
@@ -126,12 +144,6 @@ public final class SavingPrivateRahya extends JavaPlugin
                         s.setTarget(player);
                         player.sendMessage("Sentry " + s.getEntityId() + " is now tracking you.");
                     });
-        }
-        if(cmd.getName().equals("glowme") && sender instanceof Player player)
-        {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 300,0));
-            player.sendMessage("Your friends can see you now!");
-            return true;
         }
         return false;
     }

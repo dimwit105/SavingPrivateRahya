@@ -4,7 +4,6 @@ import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.Enderw
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
@@ -22,10 +21,10 @@ public class LavaSave extends AbstractAbility
     {
         if(event.getCause() != EntityDamageEvent.DamageCause.LAVA)
             return;
-        if(!isReady())
+        if(onCooldown())
             return;
 
-        Wolf eWolf = enderwolf.getWolf();
+        Wolf eWolf = enderwolf.getWolf().get();
         if(event.getEntity() instanceof Player player && player.getHealth() < 8D)
         {
             Location tele = buildPlatform(player);

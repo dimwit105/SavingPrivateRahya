@@ -4,9 +4,9 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.enderwolf.Enderwolf;
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityExhaustionEvent;
 import org.bukkit.inventory.ItemRarity;
@@ -47,10 +47,9 @@ public class VerySuspiciousStew extends AbstractAbility
     @EventHandler
     public void exhaustEvent(EntityExhaustionEvent event)
     {
-        if(!isReady())
+        if(onCooldown())
             return;
-        Wolf eWolf = enderwolf.getWolf();
-        if(event.getEntity() instanceof Player p && p.getFoodLevel() <= 10 && p.getWorld() == eWolf.getWorld())
+        if(event.getEntity() instanceof Player p && p.getFoodLevel() <= 10)
         {
             enderwolf.tempOwner(p);
             spawnStew(p);
@@ -83,5 +82,6 @@ public class VerySuspiciousStew extends AbstractAbility
         if (!remaining.isEmpty()) {
             p.getWorld().dropItemNaturally(p.getLocation(), stew);
         }
+        p.sendMessage(Component.text("The enderwolf has bestowed upon you its finest stew!").color(TextColor.color(128, 210, 128)));
     }
 }

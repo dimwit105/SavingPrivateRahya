@@ -3,6 +3,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.mobs;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameState;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.EscalatingCapTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.MobTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
@@ -11,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -20,8 +22,10 @@ import java.util.*;
 
 public class MobManager
 {
+    public static final int DEFAULT_MOB_CAP = 100;
     public static final NamespacedKey CUSTOM = new NamespacedKey(SavingPrivateRahya.PLUGIN, "custom");
     public static final NamespacedKey TRACKING = new NamespacedKey(SavingPrivateRahya.PLUGIN, "tracking");
+    private EscalatingCapTask escalatingCapTask;
 
     public final List<MobTier> bonusMobs = List.of(
             new MobTier(EntityType.BREEZE, 2, List.of(MobTier.MobBehavior.of(-2, Breeze.class, breeze -> {
@@ -55,9 +59,8 @@ public class MobManager
     public MobManager(Game game)
     {
         this.game = game;
+        this.escalatingCapTask = new EscalatingCapTask(this);
     }
-
-
 
     public void onMobTaskCancelled()
     {
@@ -66,6 +69,35 @@ public class MobManager
     private void cleanSiegerList()
     {
         siegers.removeIf(MobTask::isCancelled);
+    }
+
+    public void escalateNaturalSpawns()
+    {
+        if(game.getState() == GameState.CANCELLED)
+            escalatingCapTask.cancel();
+        if(game.getState() != GameState.IN_PROGRESS)
+            return;
+        //ranges from 6 to -5
+        int segments = game.getTime().getSegmentsRemaining();
+        int capIncrease = segments > 0 ? (6 - segments) * 15 : 60 + segments * -30;
+        capIncrease += game.getParticipants().size()*10;
+
+        double[] tps = Bukkit.getTPS();
+        if(tps[0] <= 15)
+        {
+            game.nether.setSpawnLimit(SpawnCategory.MONSTER, DEFAULT_MOB_CAP);
+            return;
+        }
+        if(tps[0] < 17)
+            capIncrease = (int) (capIncrease * 0.5D);
+
+        game.nether.setSpawnLimit(SpawnCategory.MONSTER, DEFAULT_MOB_CAP + capIncrease);
+
+    }
+    public void resetNaturalSpawns()
+    {
+        game.nether.setSpawnLimit(SpawnCategory.MONSTER, DEFAULT_MOB_CAP);
+        escalatingCapTask.cancel();
     }
 
     public boolean rollSpawnSieger()
@@ -91,14 +123,14 @@ public class MobManager
         Bukkit.broadcast(Component.text("You hear the distant sound of blocks breaking"));
         return new PiglinSiegeTask(game);
     }
-    public void handleRandomSpawns(EntitySpawnEvent event)
+    public void handleRandomSpawns(CreatureSpawnEvent event)
     {
         if(event.getEntity().getPersistentDataContainer().has(CUSTOM))
             return;
         if (game.getState() != GameState.IN_PROGRESS) return;
 
         int segmentsRemaining = game.getTime().getSegmentsRemaining();
-        if(SavingPrivateRahya.RAND.nextInt(Math.max(1, 7 + segmentsRemaining)) == 0)
+        if(SavingPrivateRahya.RAND.nextInt(Math.max(1, 5 + segmentsRemaining)) == 0)
         {
             List<MobTier> eligible = bonusMobs.stream()
                     .filter(tier -> tier.getMinSegment() >= segmentsRemaining)
@@ -125,7 +157,6 @@ public class MobManager
                     });
 
         }
-
     }
 
 }

@@ -17,8 +17,11 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 public class Participant
@@ -39,6 +42,7 @@ public class Participant
         this.playerID = playerID;
         this.game = game;
         spawnLocation = SpawnLocation.OVERWORLD;
+        handleTeam();
     }
 
     public Participant(Participant other)
@@ -50,6 +54,7 @@ public class Participant
         this.respawning = other.respawning;
         this.game = other.game;
         this.tasks = new ArrayList<>(other.tasks);
+        handleTeam();
     }
 
     /**
@@ -60,6 +65,7 @@ public class Participant
     public boolean electSpawn(SpawnLocation location)
     {
         spawnLocation = location;
+        handleTeam();
         return true;
     }
 
@@ -70,7 +76,7 @@ public class Participant
     public void eliminate()
     {
         eliminated = true;
-        eliminationLocation = getPlayer().getLocation();
+        getPlayer().ifPresent(player -> eliminationLocation = player.getLocation());
         addTask(new EliminatedParticipant(this));
     }
     public void onDeath(PlayerDeathEvent event)
@@ -84,7 +90,10 @@ public class Participant
     }
     public void onRespawn(PlayerRespawnEvent event)
     {
-        if(game.isPreGame() || game.getVip() == null)
+        if(getPlayer().isEmpty())
+            return;
+        var player = getPlayer().get();
+        if(game.isPreGame() || game.getVip().isEmpty() || game.getVip().get().getPlayer().isEmpty())
         {
             event.setRespawnLocation(game.gameCenter);
             return;
@@ -92,13 +101,13 @@ public class Participant
         if(respawning)
         {
             respawning = false;
-            getPlayer().setGameMode(GameMode.SPECTATOR);
-            event.setRespawnLocation(game.getVip().getPlayer().getLocation());
+            player.setGameMode(GameMode.SPECTATOR);
+            event.setRespawnLocation(game.getVip().get().getPlayer().get().getLocation());
             addTask(new RespawningParticipant(this));
         }
         if(eliminated)
         {
-            getPlayer().setGameMode(GameMode.SPECTATOR);
+            player.setGameMode(GameMode.SPECTATOR);
             event.setRespawnLocation(eliminationLocation);
         }
     }
@@ -115,53 +124,73 @@ public class Participant
     public void addTask(ParticipantTask task)
     {
         tasks.add(task);
-        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(getPlayer(), task, 0, 20);
+        getPlayer().ifPresent(player -> {
+            SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(player, task, 0, 20);
+
+        });
     }
     public void beginGame()
     {
-        for(var modifiers : getPlayer().getAttribute(Attribute.MAX_HEALTH).getModifiers())
+        if(getPlayer().isEmpty())
+            return;
+
+        var player = getPlayer().get();
+        for(var modifiers : player.getAttribute(Attribute.MAX_HEALTH).getModifiers())
         {
-            getPlayer().getAttribute(Attribute.MAX_HEALTH).removeModifier(modifiers);
+            player.getAttribute(Attribute.MAX_HEALTH).removeModifier(modifiers);
         }
-        getPlayer().setHealth(getPlayer().getAttribute(Attribute.MAX_HEALTH).getValue());
-        getPlayer().setFireTicks(0);
-        getPlayer().setFoodLevel(20);
-        getPlayer().setSaturation(5);
-        getPlayer().clearActivePotionEffects();
-        getPlayer().addPotionEffect(PotionEffectType.SLOW_FALLING.createEffect(300,0));
+        player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
+        player.setFireTicks(0);
+        player.setFoodLevel(20);
+        player.setSaturation(5);
+        player.clearActivePotionEffects();
+        player.addPotionEffect(PotionEffectType.SLOW_FALLING.createEffect(300,0));
         switch (spawnLocation)
         {
             case NETHER -> {
-                getPlayer().teleportAsync(game.wm.getCageCenter()).thenAccept(tpd -> {
-                    getPlayer().getInventory().clear();
+                player.teleportAsync(game.wm.getCageCenter()).thenAccept(tpd -> {
+                    player.getInventory().clear();
                     giveStartingGear(spawnLocation);
                 });
             }
             case OVERWORLD -> {
-                getPlayer().teleportAsync(game.gameCenter).thenAccept(tpd -> {
-                    getPlayer().getInventory().clear();
+                player.teleportAsync(game.gameCenter).thenAccept(tpd -> {
+                    player.getInventory().clear();
                     giveStartingGear(spawnLocation);
                 });
             }
         }
-        getPlayer().setGameMode(GameMode.SURVIVAL);
+        player.setGameMode(GameMode.SURVIVAL);
     }
     protected void giveStartingGear(SpawnLocation location)
     {
+        if (getPlayer().isEmpty())
+            return;
+        var player = getPlayer().get();
         if(location == SpawnLocation.NETHER) {
             ItemStack startingPickaxe = new ItemStack(Material.COPPER_PICKAXE);
             startingPickaxe.addEnchantment(Enchantment.UNBREAKING, 1);
-            getPlayer().getInventory().addItem(startingPickaxe);
-            getPlayer().getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
-            getPlayer().getInventory().addItem(ItemStack.of(Material.BLACKSTONE, 32));
-            getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
+            player.getInventory().addItem(startingPickaxe);
+            player.getInventory().addItem(ItemStack.of(Material.GOLDEN_CARROT, 4));
+            player.getInventory().addItem(ItemStack.of(Material.BLACKSTONE, 32));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 100, 0));
         }
         ItemUtil.giveNethersideCompass(this);
     }
 
-    public Player getPlayer()
+    public void handleTeam()
     {
-        return Bukkit.getPlayer(playerID);
+        Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
+        switch (spawnLocation)
+        {
+            case NETHER -> board.getTeam(Game.NETHER_TEAM_NAME).addPlayer(Bukkit.getOfflinePlayer(getID()));
+            case OVERWORLD -> board.getTeam(Game.OVERWORLD_TEAM_NAME).addPlayer(Bukkit.getOfflinePlayer(getID()));
+        }
+    }
+
+    public Optional<Player> getPlayer()
+    {
+        return Optional.ofNullable(Bukkit.getPlayer(playerID));
     }
 
     /**

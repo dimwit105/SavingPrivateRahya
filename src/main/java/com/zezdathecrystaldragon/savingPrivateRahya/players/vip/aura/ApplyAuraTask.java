@@ -20,9 +20,9 @@ public class ApplyAuraTask extends ParticipantTask
 
     @Override
     public void run() {
-        Player player = participant.getPlayer();
+        Player player = participant.getPlayer().orElseThrow();
         int currentLevel = vip.getAura().getLevel();
-        if (player == null || currentLevel <= 0) return;
+        if (currentLevel <= 0) return;
 
         Map<PotionEffectType, PotionEffect> toApply = new HashMap<>();
 

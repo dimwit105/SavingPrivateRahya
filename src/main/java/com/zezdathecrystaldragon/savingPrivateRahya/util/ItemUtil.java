@@ -1,6 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.util;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,12 +24,13 @@ public class ItemUtil
                 netherSidePortal.getBlockY(),
                 netherSidePortal.getBlockZ())));
         meta.setLodestone(netherSidePortal);
-        meta.customName(Component.text(String.format("%s's way out", participant.getGame().getVip().getPlayer().getName())));
-        meta.lore(loreToAdd);
-
+        participant.getGame().getVip()
+                .flatMap(VeryImportantParticipant::getPlayer)
+                .map(player -> String.format("%s's way out", player.getName()))
+                .map(Component::text)
+                .ifPresent(meta::customName);        meta.lore(loreToAdd);
         meta.setRarity(ItemRarity.RARE);
         nethersideCompass.setItemMeta(meta);
-        participant.getPlayer().getInventory().addItem(nethersideCompass);
-
+        participant.getPlayer().ifPresent( player -> player.getInventory().addItem(nethersideCompass));
     }
 }

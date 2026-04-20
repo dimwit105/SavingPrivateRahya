@@ -41,7 +41,7 @@ public class RegeneratingShieldTask extends VIPTask
         tickCounter = effectiveDelay;
 
         setMaxAbsorption(effectiveCapacity);
-        vip.getPlayer().setAbsorptionAmount(effectiveCapacity);
+        vip.getPlayer().ifPresent(player -> player.setAbsorptionAmount(effectiveCapacity));
     }
 
     @Override
@@ -57,32 +57,30 @@ public class RegeneratingShieldTask extends VIPTask
     {
         super.cancel();
         if(absorptionModifier != null)
-            vip.getPlayer().getAttribute(Attribute.MAX_ABSORPTION).removeModifier(absorptionModifier);
+            vip.getPlayer().ifPresent(player -> player.getAttribute(Attribute.MAX_ABSORPTION).removeModifier(absorptionModifier));
     }
 
     @Override
     public void run()
     {
-        Player player = vip.getPlayer();
-        if(player == null)
-            return;
-        setMaxAbsorption(effectiveCapacity);
-        if(tickCounter < effectiveDelay)
-        {
-            tickCounter++;
-            return;
-        }
-        if(!playSound)
-        {
-            playSound = true;
-            player.getWorld().playSound(player, Sound.BLOCK_BEACON_ACTIVATE, 1, 1);
-        }
-        if (effectiveRechargeQuantity <= 0) return;
+        vip.getPlayer().ifPresent(player -> {
+            setMaxAbsorption(effectiveCapacity);
+            if(tickCounter < effectiveDelay)
+            {
+                tickCounter++;
+                return;
+            }
+            if(!playSound)
+            {
+                playSound = true;
+                player.getWorld().playSound(player, Sound.BLOCK_BEACON_ACTIVATE, 1, 1);
+            }
+            if (effectiveRechargeQuantity <= 0) return;
 
-        int amountToAdd = GameMath.stochasticRounding(effectiveRechargeQuantity);
-        double currentShield = player.getAbsorptionAmount();
-        player.setAbsorptionAmount(Math.min(effectiveCapacity, currentShield + amountToAdd));
-
+            int amountToAdd = GameMath.stochasticRounding(effectiveRechargeQuantity);
+            double currentShield = player.getAbsorptionAmount();
+            player.setAbsorptionAmount(Math.min(effectiveCapacity, currentShield + amountToAdd));
+        });
     }
     private double calculateStat(double base, ShieldModifier.Target target)
     {
@@ -110,12 +108,13 @@ public class RegeneratingShieldTask extends VIPTask
     {
         if(absorptionModifier != null && absorptionModifier.getAmount() == amount)
             return;
-
-        AttributeModifier newMod = new AttributeModifier(VIP_ABSORPTION, amount, AttributeModifier.Operation.ADD_NUMBER);
-        if(absorptionModifier != null)
-            vip.getPlayer().getAttribute(Attribute.MAX_ABSORPTION).removeModifier(absorptionModifier);
-        vip.getPlayer().getAttribute(Attribute.MAX_ABSORPTION).addModifier(newMod);
-        absorptionModifier = newMod;
+        vip.getPlayer().ifPresent(player -> {
+            AttributeModifier newMod = new AttributeModifier(VIP_ABSORPTION, amount, AttributeModifier.Operation.ADD_NUMBER);
+            if(absorptionModifier != null)
+                player.getAttribute(Attribute.MAX_ABSORPTION).removeModifier(absorptionModifier);
+            player.getAttribute(Attribute.MAX_ABSORPTION).addModifier(newMod);
+            absorptionModifier = newMod;
+        });
     }
 
     public void applyModifier(String id, double val, ShieldModifier.Operation op, ShieldModifier.Target target) {

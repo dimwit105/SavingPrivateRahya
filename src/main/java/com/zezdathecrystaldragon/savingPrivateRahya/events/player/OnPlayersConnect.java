@@ -2,6 +2,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.events.player;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
+import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
@@ -27,9 +28,11 @@ public class OnPlayersConnect implements Listener
                 event.getPlayer().sendMessage("The game has already started, and you will not be able to participate, sorry!");
             }
         }
-        else if(game.getVip().getID() == event.getPlayer().getUniqueId())
+        else
         {
-            game.getVip().reconnect();
+            game.getVip()
+                    .filter(vip -> vip.getID().equals(event.getPlayer().getUniqueId()))
+                    .ifPresent(VeryImportantParticipant::reconnect);
         }
         game.getTime().onPlayerConnect(event.getPlayer());
     }

@@ -1,10 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
-import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.OnEntityAttacked;
-import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.OnEntityDeath;
-import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.OnMobSpawn;
-import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.OnProjectileLaunch;
+import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.*;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.player.*;
 import org.bukkit.Bukkit;
 
@@ -26,5 +23,6 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnProjectileLaunch(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityAttacked(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityDeath(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnEntityTarget(), spr);
     }
 }
