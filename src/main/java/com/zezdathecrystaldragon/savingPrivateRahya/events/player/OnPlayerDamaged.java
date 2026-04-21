@@ -21,7 +21,7 @@ public class OnPlayerDamaged implements Listener
             SavingPrivateRahya.PLUGIN.getGame().getVip()
                     .filter(vip -> vip.getPlayer().filter(p::equals).isPresent())
                     .ifPresent(vip -> {
-                        if (event.getFinalDamage() > 0 || event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION) > 0) {
+                        if (event.getFinalDamage() > 0 || event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION) < 0) {
                             vip.getShield().takeHit();
                         }
                     });

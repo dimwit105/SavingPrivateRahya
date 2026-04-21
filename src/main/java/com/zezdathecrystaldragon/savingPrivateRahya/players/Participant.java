@@ -33,6 +33,8 @@ public class Participant
     boolean eliminated = false;
     Location eliminationLocation;
     boolean respawning = false;
+    private boolean restored = false;
+
     public VeryImportantParticipant toVIP()
     {
         return new VeryImportantParticipant(this);
@@ -135,10 +137,7 @@ public class Participant
             return;
 
         var player = getPlayer().get();
-        for(var modifiers : player.getAttribute(Attribute.MAX_HEALTH).getModifiers())
-        {
-            player.getAttribute(Attribute.MAX_HEALTH).removeModifier(modifiers);
-        }
+        player.getAttribute(Attribute.MAX_HEALTH).removeModifier(SavingPrivateRahya.REVIVED_MISSING_HEARTS);
         player.setHealth(player.getAttribute(Attribute.MAX_HEALTH).getValue());
         player.setFireTicks(0);
         player.setFoodLevel(20);
@@ -222,5 +221,12 @@ public class Participant
     public boolean isEliminated() {return eliminated;}
     public UUID getID() { return playerID;}
     public Game getGame() {return game;}
+    public SpawnLocation getSpawnLocation() {return spawnLocation;}
+    public boolean getRestored() {return restored;}
+    public void setRestoredTrue()
+    {
+        if(!game.isPreGame())
+            restored = true;
+    }
 
 }

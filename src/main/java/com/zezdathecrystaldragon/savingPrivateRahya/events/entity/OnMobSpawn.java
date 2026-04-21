@@ -1,21 +1,17 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events.entity;
 
+import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import net.kyori.adventure.text.Component;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.goals.TargetGhastGoal;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.entity.IronGolem;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Snowman;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class OnMobSpawn implements Listener
@@ -25,7 +21,7 @@ public class OnMobSpawn implements Listener
     {
 
         Game game = SavingPrivateRahya.PLUGIN.getGame();
-        if(event.getEntity() instanceof LivingEntity && event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
+        if(event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
         {
             game.getMobs().handleRandomSpawns(event);
         }
@@ -37,10 +33,13 @@ public class OnMobSpawn implements Listener
             return;
         if(event.getEntity() instanceof Snowman sm)
         {
+            var goals = Bukkit.getMobGoals();
             sm.addPotionEffect(PotionEffectType.FIRE_RESISTANCE.createEffect(20*600, 0));
             sm.getAttribute(Attribute.FOLLOW_RANGE).setBaseValue(128D);
             sm.getAttribute(Attribute.MAX_HEALTH).setBaseValue(40D);
             sm.setHealth(sm.getAttribute(Attribute.MAX_HEALTH).getValue());
+            goals.removeGoal(sm, VanillaGoal.MELEE_ATTACK);
+            goals.addGoal(sm, 1, new TargetGhastGoal(SavingPrivateRahya.PLUGIN, sm));
             sm.getPersistentDataContainer().set(SavingPrivateRahya.PLUGIN.VIP_MOB, PersistentDataType.BOOLEAN, true);
         }
         if(event.getEntity() instanceof IronGolem gm)

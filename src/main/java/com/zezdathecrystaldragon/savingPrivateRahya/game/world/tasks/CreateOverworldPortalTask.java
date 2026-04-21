@@ -6,6 +6,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -27,8 +28,11 @@ public class CreateOverworldPortalTask extends WorldTask {
             if (loc == null) return;
 
             SavingPrivateRahya.runNextTick(task -> {
-                boolean isFallback = (loc.getBlockX() == 0 && loc.getBlockY() == 64 && loc.getBlockZ() == 0);
-                wm.buildPortalWithPlatform(overworld, loc, orientation, isFallback);
+                wm.buildPortalWithPlatform(overworld, loc, orientation, false);
+                var beacon = wm.buildBeaconPyramid(loc.clone().add(0,5,0), 1);
+                beacon.setPrimaryEffect(PotionEffectType.HASTE);
+                beacon.setEffectRange(256);
+                beacon.update();
             });
         });
     }

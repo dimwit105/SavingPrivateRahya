@@ -35,7 +35,7 @@ public class Game
     public final int extractionZoneBuffer = 16;
     public final int extractionZoneTotal = extractionZone + extractionZoneBuffer;
 
-    public final int baseTime = 6*60;
+    public final int baseTime = 45*60;
     public final Location gameCenter;
 
     private final TimerTask time = new TimerTask(this, baseTime);
@@ -59,16 +59,17 @@ public class Game
         this.gameCenter = Game.newGameCenter(overworld).add(0,2,0);
         wm = new WorldModifier(this);
         mobs = new MobManager(this);
-        for(Player p : Bukkit.getOnlinePlayers())
-        {
-            addParticipant(p);
-            p.teleportAsync(this.gameCenter);
-        }
         nether.getWorldBorder().setCenter(GameMath.netherify(nether, gameCenter).getBlockX(), GameMath.netherify(nether, gameCenter).getBlockZ());
         nether.getWorldBorder().setSize(vipDistance*3.0F);
         nether.setDifficulty(Difficulty.HARD);
         nether.setSpawnLimit(SpawnCategory.MONSTER, 100);
         overworld.setDifficulty(Difficulty.HARD);
+        setupTeams();
+        for(Player p : Bukkit.getOnlinePlayers())
+        {
+            addParticipant(p);
+            p.teleportAsync(this.gameCenter);
+        }
         try{
             Objective objective = Bukkit.getScoreboardManager().getMainScoreboard().registerNewObjective("Health", Criteria.HEALTH, Component.text("health"), RenderType.HEARTS);
             objective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
@@ -76,13 +77,6 @@ public class Game
         catch (IllegalArgumentException e)
         {
             SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "There's already a scoreboard objective named health, skipping");
-        }
-        try{
-            setupTeams();
-        }
-        catch (IllegalArgumentException e)
-        {
-            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Teams are already setup!");
         }
     }
 
@@ -285,19 +279,24 @@ public class Game
         }
         return overworld.getHighestBlockAt(targetLocation).getLocation();
     }
-    public static void setupTeams()
-    {
+    public static void setupTeams() {
         Scoreboard board = Bukkit.getScoreboardManager().getMainScoreboard();
-        for(Team team : board.getTeams())
-        {
-            team.removeEntries(team.getEntries());
-        }
-        Team overworldTeam = board.registerNewTeam(OVERWORLD_TEAM_NAME);
-        Team netherTeam = board.registerNewTeam(NETHER_TEAM_NAME);
-        Team vipTeam = board.registerNewTeam(VIP_TEAM_NAME);
 
-        overworldTeam.color(NamedTextColor.AQUA);
-        netherTeam.color(NamedTextColor.RED);
-        vipTeam.color(NamedTextColor.YELLOW);
+        Team overworldTeam = getOrCreateTeam(board, OVERWORLD_TEAM_NAME, NamedTextColor.AQUA);
+        Team netherTeam = getOrCreateTeam(board, NETHER_TEAM_NAME, NamedTextColor.RED);
+        Team vipTeam = getOrCreateTeam(board, VIP_TEAM_NAME, NamedTextColor.YELLOW);
+
+        overworldTeam.removeEntries(overworldTeam.getEntries());
+        netherTeam.removeEntries(netherTeam.getEntries());
+        vipTeam.removeEntries(vipTeam.getEntries());
+    }
+
+    private static Team getOrCreateTeam(Scoreboard board, String name, NamedTextColor color) {
+        Team team = board.getTeam(name);
+        if (team == null) {
+            team = board.registerNewTeam(name);
+        }
+        team.color(color);
+        return team;
     }
 }

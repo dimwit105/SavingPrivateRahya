@@ -30,6 +30,7 @@ public final class SavingPrivateRahya extends JavaPlugin
 {
     private Game game;
     public static SavingPrivateRahya PLUGIN;
+    public static final NamespacedKey REVIVED_MISSING_HEARTS = new NamespacedKey("fourthchance", "revived");
     public final NamespacedKey GAME_INDEX_KEY = new NamespacedKey(this, "last_game_index");
     public final NamespacedKey VIP_MOB = new NamespacedKey(this, "vip_mob");
     public static FourthChanceHook FOURTH_CHANCE = null;

@@ -1,5 +1,6 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game.world;
 
+import com.sun.jdi.InvalidTypeException;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateCageTask;
@@ -11,10 +12,12 @@ import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.TypedKey;
 import io.papermc.paper.registry.keys.tags.BiomeTagKeys;
 import org.bukkit.*;
+import org.bukkit.block.Beacon;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BiomeSearchResult;
 
 import java.util.*;
@@ -22,6 +25,9 @@ import java.util.logging.Level;
 
 public class WorldModifier
 {
+    private static final Material[] STAINED_GLASS_BLOCKS = Arrays.stream(Material.values())
+            .filter(m -> m.name().endsWith("_STAINED_GLASS") && !m.name().contains("PANE"))
+            .toArray(Material[]::new);
     /**
      * Materials we will absolutely bulldoze without a care in the world.
      */
@@ -185,6 +191,41 @@ public class WorldModifier
                 plat.getBlock().setType(Material.OBSIDIAN);
             }
         }
+    }
+    public Beacon buildBeaconPyramid(Location loc, int height) {
+        if (height < 1) throw new IllegalArgumentException("Height must be more than one!");
+
+        for (int yOffset = 0; yOffset < height; yOffset++) {
+
+            int radius = height - yOffset;
+
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    // Place the block relative to the center location
+                    loc.clone().add(x, yOffset, z).getBlock().setType(getBeaconMaterial());
+                }
+            }
+        }
+
+        loc.clone().add(0, height, 0).getBlock().setType(Material.BEACON);
+        loc.clone().add(0, height+1, 0).getBlock().setType(getRandomStainedGlass());
+        var beacon = loc.getWorld().getBlockAt(loc.clone().add(0, height, 0)).getState();
+        if(beacon instanceof Beacon)
+            return (Beacon) beacon;
+        else
+            return null;
+    }
+    private Material getBeaconMaterial()
+    {
+        var roll = SavingPrivateRahya.RAND.nextInt(100);
+        if(roll == 0) return Material.DIAMOND_BLOCK;
+        if(roll < 33) return Material.IRON_BLOCK;
+        if(roll < 50) return Material.GOLD_BLOCK;
+        return Material.EMERALD_BLOCK;
+    }
+
+    private Material getRandomStainedGlass() {
+        return STAINED_GLASS_BLOCKS[SavingPrivateRahya.RAND.nextInt(STAINED_GLASS_BLOCKS.length)];
     }
 
     public Location getCageCenter() {return cageCenter;}

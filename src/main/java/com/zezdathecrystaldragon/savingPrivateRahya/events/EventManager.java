@@ -20,9 +20,12 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnBlockBreak(), spr);
         Bukkit.getPluginManager().registerEvents(new OnPlayerInteract(), spr);
         Bukkit.getPluginManager().registerEvents(new OnMobSpawn(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnMobPreSpawn(), spr);
         Bukkit.getPluginManager().registerEvents(new OnProjectileLaunch(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnProjectileImpact(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityAttacked(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityDeath(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityTarget(), spr);
+
     }
 }
