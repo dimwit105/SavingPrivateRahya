@@ -27,7 +27,7 @@ public class MobManager
     public static final NamespacedKey TRACKING = new NamespacedKey(SavingPrivateRahya.PLUGIN, "tracking");
     private EscalatingCapTask escalatingCapTask;
 
-    public final List<MobTier> bonusMobs = List.of(
+    public static final List<MobTier> bonusMobs = List.of(
             new MobTier(EntityType.BREEZE, 2, List.of(MobTier.MobBehavior.of(-2, Breeze.class, breeze -> {
                 breeze.getPersistentDataContainer().set(TRACKING, PersistentDataType.BOOLEAN, true);
             }))),

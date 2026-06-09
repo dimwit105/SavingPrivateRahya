@@ -30,6 +30,7 @@ public class HeatSeekingFireball extends CancellableRunnable
     @Override
     public void cancel()
     {
+        super.cancel();
         heatSeekers.remove(heatSeeker);
     }
 
