@@ -15,10 +15,13 @@ import org.bukkit.*;
 import org.bukkit.block.Beacon;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.Jukebox;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BiomeSearchResult;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -33,8 +36,6 @@ public class WorldModifier
      */
     public final List<Material> nonBlockers;
     private final int cageSize = 5;
-    private final NamespacedKey OVERWORLD_PORTAL_KEY;
-    private final NamespacedKey NETHER_PORTAL_KEY;
     private boolean ready = false;
     Game game;
     Location cageCenter;
@@ -49,33 +50,13 @@ public class WorldModifier
         nb.addAll(Tag.WART_BLOCKS.getValues());
         nb.add(Material.SHROOMLIGHT);
         nonBlockers = Collections.unmodifiableList(nb);
-        this.OVERWORLD_PORTAL_KEY = new NamespacedKey(SavingPrivateRahya.PLUGIN, "overworld_portal_generated");
-        this.NETHER_PORTAL_KEY = new NamespacedKey(SavingPrivateRahya.PLUGIN, "nether_portal_generated");
 
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(cageSearchTask, 5, 1);
 
-        checkAndGeneratePortal(game.overworld, OVERWORLD_PORTAL_KEY, new CreateOverworldPortalTask(game, this));
-
-        checkAndGeneratePortal(game.nether, NETHER_PORTAL_KEY, new CreateNetherPortalTask(game, this));
+        new CreateOverworldPortalTask(game, this).run();
+        new CreateNetherPortalTask(game, this).run();
     }
 
-    private void checkAndGeneratePortal(World world, NamespacedKey key, WorldTask task) {
-        PersistentDataContainer pdc = world.getPersistentDataContainer();
-
-        // If the flag doesn't exist (Byte 0 or null), run the task
-        if (!pdc.has(key, PersistentDataType.BYTE)) {
-            // We run the task. We'll handle the "Success" flag inside the task's completion.
-            task.run();
-        } else {
-            SavingPrivateRahya.PLUGIN.getLogger().info("Skipping portal generation for " + world.getName() + ": Already exists.");
-        }
-    }
-    //TODO: mark portals as generated. Purposefully disabled right now for testing.
-    public void markPortalGenerated(World world, boolean isNether) {
-        NamespacedKey key = isNether ? NETHER_PORTAL_KEY : OVERWORLD_PORTAL_KEY;
-        world.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
-        SavingPrivateRahya.PLUGIN.getLogger().info("Portal flag saved to PDC for " + world.getName());
-    }
     public static int getAndIncrementGameIndex(World world) {
         PersistentDataContainer pdc = world.getPersistentDataContainer();
 
@@ -85,13 +66,6 @@ public class WorldModifier
         pdc.set(SavingPrivateRahya.PLUGIN.GAME_INDEX_KEY, PersistentDataType.INTEGER, nextIndex);
 
         return currentIndex;
-    }
-    public static int moduloIndex(World world, int modulo)
-    {
-        PersistentDataContainer pdc = world.getPersistentDataContainer();
-
-        int currentIndex = pdc.getOrDefault(SavingPrivateRahya.PLUGIN.GAME_INDEX_KEY, PersistentDataType.INTEGER, 0);
-        return currentIndex % modulo;
     }
 
     public void createVIPCage(World w, Location startCorner) {
@@ -149,6 +123,13 @@ public class WorldModifier
         }
         ready = true;
         cageCenter = startCorner.clone().add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
+        w.getBlockAt(cageCenter.clone().subtract(1,0,0)).setType(Material.JUKEBOX);
+        Block tunes = w.getBlockAt(cageCenter.clone().subtract(1,0,0));
+        if(tunes instanceof Jukebox jb)
+        {
+            jb.setRecord(ItemStack.of(Material.MUSIC_DISC_FAR));
+        }
+
         SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
     }
 
