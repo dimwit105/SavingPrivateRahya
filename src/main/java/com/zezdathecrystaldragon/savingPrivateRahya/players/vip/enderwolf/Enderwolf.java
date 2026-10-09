@@ -16,7 +16,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.persistence.PersistentDataType;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +27,6 @@ public class Enderwolf
     private EnderwolfCooldownTask cooldownTask;
     private int respawnTime = 0;
     private int globalCooldown = 0;
-    @Nullable
     private Wolf enderWolf;
     private ArrayList<AbstractAbility> abilities = new ArrayList<>();
 
