@@ -4,7 +4,7 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.CountdownTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.NetherHeatTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.TimerTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.MobManager;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.NaturalMobManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
@@ -12,11 +12,13 @@ import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Jukebox;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SpawnCategory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.*;
-import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -39,7 +41,7 @@ public class Game
     public final Location gameCenter;
 
     private final TimerTask time = new TimerTask(this, baseTime);
-    private MobManager mobs;
+    private NaturalMobManager mobs;
     private CountdownTask countdownTask;
     private NetherHeatTask heat;
     private final TitleManager titles = new TitleManager(this);
@@ -58,7 +60,7 @@ public class Game
                 .orElse(Bukkit.getWorlds().getFirst());
         this.gameCenter = Game.newGameCenter(overworld).add(0,2,0);
         wm = new WorldModifier(this);
-        mobs = new MobManager(this);
+        mobs = new NaturalMobManager(this);
         nether.getWorldBorder().setCenter(GameMath.netherify(nether, gameCenter).getBlockX(), GameMath.netherify(nether, gameCenter).getBlockZ());
         nether.getWorldBorder().setSize(vipDistance*3.0F);
         nether.setDifficulty(Difficulty.HARD);
@@ -128,6 +130,16 @@ public class Game
         {
             part.beginGame();
         }
+        Block tunes = wm.getCageCenter().getWorld().getBlockAt(wm.getCageCenter().clone().subtract(WorldModifier.JUKEBOX_SPAWN_OFFSET));
+
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtLocationLater(wm.getCageCenter(), () -> {
+            if(tunes.getState() instanceof Jukebox jb)
+            {
+                jb.setRecord(ItemStack.of(Material.MUSIC_DISC_FAR));
+                jb.update();
+            }
+        }, 20L);
+
         time.start();
         overworld.setTime(0);
         overworld.setClearWeatherDuration(5*60*20);
@@ -248,7 +260,7 @@ public class Game
     public TimerTask getTime() {return time;}
     public TitleManager getTitles() {return titles;}
     public NetherHeatTask getHeat() {return heat;}
-    public MobManager getMobs() {return mobs;}
+    public NaturalMobManager getMobs() {return mobs;}
 
     public GameState getState() { return currentState;}
 

@@ -2,21 +2,8 @@ package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.MobTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Piglin;
-import org.bukkit.entity.Player;
-
-import java.util.ArrayList;
-import java.util.logging.Level;
 
 public class NetherHeatTask extends CancellableRunnable
 {
@@ -62,7 +49,5 @@ public class NetherHeatTask extends CancellableRunnable
         if (excess > 0) {
             canQuickCool = false;
         }
-        game.getMobs().rollSpawnSieger();
     }
-
 }

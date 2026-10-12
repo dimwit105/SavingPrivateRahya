@@ -1,7 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events.entity;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.MobManager;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.NaturalMobManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.HeatSeekingFireball;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -30,7 +30,7 @@ public class OnProjectileLaunch implements Listener
 
             SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(fireball, new HeatSeekingFireball(fireball, sm.getTarget(), 0.5F), 6, 1);
         }
-        if(event.getEntity().getShooter() instanceof Mob le && le.getPersistentDataContainer().has(MobManager.TRACKING))
+        if(event.getEntity().getShooter() instanceof Mob le && le.getPersistentDataContainer().has(NaturalMobManager.TRACKING))
         {
             event.getEntity().setVelocity(event.getEntity().getVelocity().multiply(0.33F));
             SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(event.getEntity(), new HeatSeekingFireball(event.getEntity(), le.getTarget(), 0.5F), 8, 1);

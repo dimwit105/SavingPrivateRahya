@@ -5,22 +5,18 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.GameState;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.EscalatingCapTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.MobTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.PiglinSiegeTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
-public class MobManager
+public class NaturalMobManager
 {
     public static final int DEFAULT_MOB_CAP = 100;
     public static final NamespacedKey CUSTOM = new NamespacedKey(SavingPrivateRahya.PLUGIN, "custom");
@@ -56,7 +52,7 @@ public class MobManager
 
     private ArrayList<MobTask> siegers = new ArrayList<>();
     Game game;
-    public MobManager(Game game)
+    public NaturalMobManager(Game game)
     {
         this.game = game;
         this.escalatingCapTask = new EscalatingCapTask(this);
@@ -100,29 +96,6 @@ public class MobManager
         escalatingCapTask.cancel();
     }
 
-    public boolean rollSpawnSieger()
-    {
-        if(siegers.size() >= game.getParticipants().size())
-            return false;
-        int excess = game.getHeat().getHeatValue() - game.getHeat().heatEffectsStarting;
-        if(excess <= 0)
-            return false;
-        double excessCubed = Math.pow(excess, 3);
-        double kCubed = Math.pow(game.getHeat().heatEffectsStarting, 3) * GameMath.getHarmonicNumber(game.getParticipants().size());
-        double probability = excessCubed / (excessCubed + kCubed);
-
-        if (SavingPrivateRahya.RAND.nextDouble() < probability) {
-            PiglinSiegeTask sieger = spawnSieger();
-            if (sieger != null && !sieger.isCancelled()) siegers.add(sieger);
-            return true;
-        }
-        return false;
-    }
-    private PiglinSiegeTask spawnSieger()
-    {
-        Bukkit.broadcast(Component.text("You hear the distant sound of blocks breaking"));
-        return new PiglinSiegeTask(game);
-    }
     public void handleRandomSpawns(CreatureSpawnEvent event)
     {
         if(event.getEntity().getPersistentDataContainer().has(CUSTOM))

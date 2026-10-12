@@ -1,6 +1,9 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault;
 
+import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.GameState;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.tasks.AssaultWaveTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
 import org.bukkit.Bukkit;
@@ -21,13 +24,19 @@ public class AssaultManager
     private int mobsSpawnedThisTick = 0;
 
     private int maxKillsPerSustain;
+    private AssaultWaveTask tickTask;
 
     public AssaultManager(Game game)
     {
         this.game = game;
         int participants = game.getParticipants().size();
         maxSpawnsPerTick = participants * 3;
-        maxKillsPerSustain = (int) GameMath.getHarmonicNumber(participants*2);
+        maxKillsPerSustain = (int) (30*GameMath.getHarmonicNumber(participants*2));
+    }
+    public void start()
+    {
+        tickTask = new AssaultWaveTask(this);
+        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(tickTask, 20, 20);
     }
 
     public void tick()
@@ -35,8 +44,18 @@ public class AssaultManager
         if(!started)
             return;
 
+        if(game.getState() != GameState.IN_PROGRESS)
+        {
+            tickTask.cancel();
+            return;
+        }
         cycleTimer++;
         status = WaveStatus.getStatusFromTime(cycleTimer);
+    }
+
+    public WaveStatus getStatus()
+    {
+        return status;
     }
     public void assaultMobKilled()
     {
@@ -44,7 +63,6 @@ public class AssaultManager
         if(maxKillsPerSustain <= 0)
             endSustainWave();
     }
-
 
     private void endSustainWave()
     {

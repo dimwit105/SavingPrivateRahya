@@ -1,4 +1,4 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.game.tasks;
+package com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.tasks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.AssaultManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.CancellableRunnable;

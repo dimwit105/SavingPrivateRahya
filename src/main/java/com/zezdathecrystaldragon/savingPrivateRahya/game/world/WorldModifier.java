@@ -21,6 +21,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BiomeSearchResult;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -28,6 +29,7 @@ import java.util.logging.Level;
 
 public class WorldModifier
 {
+    public static final Vector JUKEBOX_SPAWN_OFFSET = new Vector(0,1,0);
     private static final Material[] STAINED_GLASS_BLOCKS = Arrays.stream(Material.values())
             .filter(m -> m.name().endsWith("_STAINED_GLASS") && !m.name().contains("PANE"))
             .toArray(Material[]::new);
@@ -123,12 +125,7 @@ public class WorldModifier
         }
         ready = true;
         cageCenter = startCorner.clone().add(Math.floorDiv(cageSize, 2),1,Math.floorDiv(cageSize, 2));
-        w.getBlockAt(cageCenter.clone().subtract(1,0,0)).setType(Material.JUKEBOX);
-        Block tunes = w.getBlockAt(cageCenter.clone().subtract(1,0,0));
-        if(tunes instanceof Jukebox jb)
-        {
-            jb.setRecord(ItemStack.of(Material.MUSIC_DISC_FAR));
-        }
+        w.getBlockAt(cageCenter.clone().subtract(JUKEBOX_SPAWN_OFFSET)).setType(Material.JUKEBOX);
 
         SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, String.format("Cage generated at %d, %d, %d", cageCenter.getBlockX(), cageCenter.getBlockY(), cageCenter.getBlockZ()));
     }

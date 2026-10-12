@@ -25,13 +25,13 @@ public class OnMobPreSpawn implements Listener
         if (event.getReason() != CreatureSpawnEvent.SpawnReason.NATURAL) return;
 
         Location loc = event.getSpawnLocation();
-        if(loc.getWorld().getEnvironment() == World.Environment.NETHER && loc.getBlockY() >= 128)
+        if(loc.getWorld().getEnvironment() == World.Environment.NETHER && loc.getBlockY() >= loc.getWorld().getLogicalHeight())
             return;
         if(event.getType() == EntityType.GHAST)
             return;
-        if (loc.getBlock().getBiome() == Biome.SOUL_SAND_VALLEY) {
-
-
+        if (loc.getBlock().getBiome() == Biome.SOUL_SAND_VALLEY)
+        {
+            /* This code would force mobs to spawn more frequently, so long as they are not ghasts. Might be reenabled later
             if (loc.getBlock().getRelative(BlockFace.DOWN).getType().isSolid() &&
                     loc.getBlock().getType().isAir()) {
                 event.setCancelled(true);
@@ -42,6 +42,7 @@ public class OnMobPreSpawn implements Listener
                 if(ent instanceof Mob m && isSpaceSafe(loc, m))
                     ent.spawnAt(loc, CreatureSpawnEvent.SpawnReason.CUSTOM);
             }
+             */
         }
     }
     private boolean isSpaceSafe(Location loc, Mob mob) {

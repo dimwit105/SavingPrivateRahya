@@ -1,4 +1,7 @@
 /.idea
+/.gradle
 /target
+/build
+
 SavingPrivateRahya.iml
 dependency-reduced-pom.xml

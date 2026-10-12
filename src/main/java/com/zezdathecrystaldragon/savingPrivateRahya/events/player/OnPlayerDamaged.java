@@ -12,7 +12,9 @@ import java.util.List;
 
 public class OnPlayerDamaged implements Listener
 {
+
     @EventHandler
+    @SuppressWarnings("deprecation")
     public void onPlayerDamaged(EntityDamageEvent event)
     {
         Game game = SavingPrivateRahya.PLUGIN.getGame();
@@ -21,6 +23,7 @@ public class OnPlayerDamaged implements Listener
             SavingPrivateRahya.PLUGIN.getGame().getVip()
                     .filter(vip -> vip.getPlayer().filter(p::equals).isPresent())
                     .ifPresent(vip -> {
+
                         if (event.getFinalDamage() > 0 || event.getDamage(EntityDamageEvent.DamageModifier.ABSORPTION) < 0) {
                             vip.getShield().takeHit();
                         }

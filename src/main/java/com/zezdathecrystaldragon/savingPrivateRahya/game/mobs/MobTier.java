@@ -1,12 +1,8 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game.mobs;
 
-import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -51,7 +47,7 @@ public class MobTier
 
         for (EntityType type : stack) {
             Entity current = loc.getWorld().spawn(loc, type.getEntityClass(), entity -> {
-                entity.getPersistentDataContainer().set(MobManager.CUSTOM, PersistentDataType.BOOLEAN, true);
+                entity.getPersistentDataContainer().set(NaturalMobManager.CUSTOM, PersistentDataType.BOOLEAN, true);
             });
 
             spawned.add(current);
