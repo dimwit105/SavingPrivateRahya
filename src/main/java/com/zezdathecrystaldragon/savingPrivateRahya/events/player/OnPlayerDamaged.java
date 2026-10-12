@@ -15,6 +15,7 @@ public class OnPlayerDamaged implements Listener
 
     @EventHandler
     @SuppressWarnings("deprecation")
+    //This deprecated function has not changed in over 10 years. If it were actually deprecated, something would have happened by now.
     public void onPlayerDamaged(EntityDamageEvent event)
     {
         Game game = SavingPrivateRahya.PLUGIN.getGame();

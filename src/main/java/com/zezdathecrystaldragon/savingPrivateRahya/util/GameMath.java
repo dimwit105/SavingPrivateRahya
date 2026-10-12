@@ -3,6 +3,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.util;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.util.Vector;
 
 public class GameMath
 {
@@ -49,6 +50,31 @@ public class GameMath
         }
 
         return new Location(overworld, gridX * cellSize, 64, gridZ * cellSize);
+    }
+
+    public static Vector restrictNormalizedVectorToPitchRange(Vector normalizedVector, double maxAngleDegrees)
+    {
+        double x = normalizedVector.getX();
+        double y = normalizedVector.getY();
+        double z = normalizedVector.getZ();
+
+        double maxSin = Math.sin(Math.toRadians(maxAngleDegrees));
+
+        if (Math.abs(y) > maxSin)
+        {
+            double newY = Math.signum(y) * maxSin;
+
+            double oldHorizontalLength = Math.sqrt(x * x + z * z);
+
+            if (oldHorizontalLength > 0.00390625F) {
+                double newHorizontalLength = Math.cos(Math.toRadians(maxAngleDegrees));
+                double scale = newHorizontalLength / oldHorizontalLength;
+                x *= scale;
+                z *= scale;
+            }
+            y = newY;
+        }
+        return new Vector(x,y,z);
     }
 
 
