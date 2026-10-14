@@ -6,16 +6,20 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.GameState;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.tasks.AssaultWaveTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
-import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AssaultManager
 {
     private WaveStatus status = WaveStatus.RECON;
-    private Game game;
+    public final Game game;
+    private Random random = SavingPrivateRahya.RAND;
+    public final RallyLocation rallyLocation;
 
     private boolean started = false;
     private int cycleTimer = WaveStatus.RETREAT.getDuration();
@@ -30,6 +34,7 @@ public class AssaultManager
     {
         this.game = game;
         int participants = game.getParticipants().size();
+        rallyLocation = new RallyLocation(game, this);
         maxSpawnsPerTick = participants * 3;
         maxKillsPerSustain = (int) (30*GameMath.getHarmonicNumber(participants*2));
     }
