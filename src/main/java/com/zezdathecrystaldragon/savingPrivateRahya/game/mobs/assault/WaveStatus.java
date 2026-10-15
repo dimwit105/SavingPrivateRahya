@@ -5,8 +5,6 @@ import java.util.Arrays;
 public enum WaveStatus
 {
     RETREAT(120),
-    RECON (60),
-    ANTICIPATION(120),
     BUILD(30),
     SUSTAIN(-1);
 

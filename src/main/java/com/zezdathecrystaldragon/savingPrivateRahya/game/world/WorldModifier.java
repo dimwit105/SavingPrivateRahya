@@ -1,12 +1,10 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game.world;
 
-import com.sun.jdi.InvalidTypeException;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateCageTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateNetherPortalTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.CreateOverworldPortalTask;
-import com.zezdathecrystaldragon.savingPrivateRahya.game.world.tasks.WorldTask;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.TypedKey;
@@ -15,21 +13,20 @@ import org.bukkit.*;
 import org.bukkit.block.Beacon;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
-import org.bukkit.block.Jukebox;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BiomeSearchResult;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Level;
 
 public class WorldModifier
 {
+    public static final NamespacedKey SPAWN_BEACON = new NamespacedKey(SavingPrivateRahya.PLUGIN, "spawn_beacon");
     public static final Vector JUKEBOX_SPAWN_OFFSET = new Vector(0,1,0);
+    //TODO More configuration settings to change
+    public static final int BEACON_BLOCKS_PER_PLAYER = 5;
     private static final Material[] STAINED_GLASS_BLOCKS = Arrays.stream(Material.values())
             .filter(m -> m.name().endsWith("_STAINED_GLASS") && !m.name().contains("PANE"))
             .toArray(Material[]::new);
@@ -170,6 +167,32 @@ public class WorldModifier
             }
         }
     }
+    public int getOptimalBeaconTier(int playerCount) {
+        int targetBlocks = playerCount * BEACON_BLOCKS_PER_PLAYER;
+        int bestHeight = 1;
+        int minDifference = Math.abs(getTierBlocks(1) - targetBlocks);
+
+        for (int tier = 2; tier <= 4; tier++) {
+            int blocks = getTierBlocks(tier);
+            int difference = Math.abs(blocks - targetBlocks);
+            if (difference < minDifference) {
+                minDifference = difference;
+                bestHeight = tier;
+            } else {
+                break;
+            }
+        }
+        return bestHeight;
+    }
+
+    private int getTierBlocks(int tier) {
+        int total = 0;
+        for (int k = 1; k <= tier; k++) {
+            total += (2 * k + 1) * (2 * k + 1);
+        }
+        return total;
+    }
+
     public Beacon buildBeaconPyramid(Location loc, int height) {
         if (height < 1) throw new IllegalArgumentException("Height must be more than one!");
 
@@ -179,7 +202,6 @@ public class WorldModifier
 
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
-                    // Place the block relative to the center location
                     loc.clone().add(x, yOffset, z).getBlock().setType(getBeaconMaterial());
                 }
             }
@@ -188,8 +210,8 @@ public class WorldModifier
         loc.clone().add(0, height, 0).getBlock().setType(Material.BEACON);
         loc.clone().add(0, height+1, 0).getBlock().setType(getRandomStainedGlass());
         var beacon = loc.getWorld().getBlockAt(loc.clone().add(0, height, 0)).getState();
-        if(beacon instanceof Beacon)
-            return (Beacon) beacon;
+        if(beacon.getBlock().getState() instanceof Beacon b)
+            return b;
         else
             return null;
     }
@@ -197,8 +219,8 @@ public class WorldModifier
     {
         var roll = SavingPrivateRahya.RAND.nextInt(100);
         if(roll == 0) return Material.DIAMOND_BLOCK;
-        if(roll < 33) return Material.IRON_BLOCK;
-        if(roll < 50) return Material.GOLD_BLOCK;
+        if(roll < 17) return Material.GOLD_BLOCK;
+        if(roll < 90) return Material.IRON_BLOCK;
         return Material.EMERALD_BLOCK;
     }
 

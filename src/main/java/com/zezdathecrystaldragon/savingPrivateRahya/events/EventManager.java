@@ -1,6 +1,9 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.events;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.events.blocks.OnBeaconDeactivate;
+import com.zezdathecrystaldragon.savingPrivateRahya.events.blocks.OnBlockBreak;
+import com.zezdathecrystaldragon.savingPrivateRahya.events.blocks.OnReceiveBeaconEffect;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.entity.*;
 import com.zezdathecrystaldragon.savingPrivateRahya.events.player.*;
 import org.bukkit.Bukkit;
@@ -26,6 +29,7 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnEntityAttacked(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityDeath(), spr);
         Bukkit.getPluginManager().registerEvents(new OnEntityTarget(), spr);
-
+        Bukkit.getPluginManager().registerEvents(new OnBeaconDeactivate(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnReceiveBeaconEffect(), spr);
     }
 }

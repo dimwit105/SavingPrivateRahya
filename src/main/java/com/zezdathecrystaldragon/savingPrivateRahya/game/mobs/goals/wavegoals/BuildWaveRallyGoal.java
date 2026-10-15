@@ -16,18 +16,15 @@ import org.bukkit.entity.Player;
 import java.util.EnumSet;
 import java.util.function.Consumer;
 
-public class AssaultWaveRallyGoal extends AbstractWaveGoal
+public class BuildWaveRallyGoal extends AbstractWaveGoal
 {
     private final Consumer<Location> rallyUpdater = this::onRallyLocationChanged;
-    private final GoalKey<Mob> key;
     private boolean hasBeenAttackedByPlayer = false;
     private int nearnessCheck = 0;
 
-    public AssaultWaveRallyGoal(AssaultManager manager, Mob mob)
+    public BuildWaveRallyGoal(AssaultManager manager, Mob mob)
     {
-        super(manager, mob);
-        this.key = GoalKey.of(Mob.class, new NamespacedKey(SavingPrivateRahya.PLUGIN, "assault_rally"));
-
+        super(manager, mob, "assault_rally");
     }
 
     @Override
@@ -86,12 +83,6 @@ public class AssaultWaveRallyGoal extends AbstractWaveGoal
                 hasBeenAttackedByPlayer = true;
             }
         }
-    }
-
-    @Override
-    public GoalKey<Mob> getKey()
-    {
-        return key;
     }
 
     @Override

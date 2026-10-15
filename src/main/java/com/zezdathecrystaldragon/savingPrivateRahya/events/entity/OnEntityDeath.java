@@ -2,6 +2,7 @@ package com.zezdathecrystaldragon.savingPrivateRahya.events.entity;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.AssaultManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.vip.VeryImportantParticipant;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
@@ -18,5 +19,16 @@ public class OnEntityDeath implements Listener
                         && wolf.getPersistentDataContainer().has(SavingPrivateRahya.PLUGIN.VIP_MOB))
                 .flatMap(VeryImportantParticipant::getEnderwolf)
                 .ifPresent(enderwolf -> enderwolf.wolfDied(event));
+    }
+
+    @EventHandler
+    public void onAssaultMobKilled(EntityDeathEvent event)
+    {
+        var entity = event.getEntity();
+        if(entity.getPersistentDataContainer().has(AssaultManager.ASSAULT_MOB))
+        {
+            Game game = SavingPrivateRahya.PLUGIN.getGame();
+            game.getAssaultManager().assaultMobKilled();
+        }
     }
 }

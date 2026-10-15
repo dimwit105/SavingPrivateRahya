@@ -23,12 +23,10 @@ import java.util.Optional;
 
 public class RetreatWaveGoal extends AbstractWaveGoal
 {
-    private final GoalKey<Mob> key;
     Location currentDestination;
     Pathfinder.PathResult currentPath;
     public RetreatWaveGoal(AssaultManager manager, Mob mob) {
-        super(manager, mob);
-        this.key = GoalKey.of(Mob.class, new NamespacedKey(SavingPrivateRahya.PLUGIN, "assault_retreat"));
+        super(manager, mob, "assault_retreat");
     }
     @Override
     public boolean shouldActivate()
@@ -51,13 +49,9 @@ public class RetreatWaveGoal extends AbstractWaveGoal
     @Override
     public void tick() {
         super.tick();
+        assaultMob.setTarget(null);
         if(!assaultMob.getPathfinder().hasPath())
             updateFleePath();
-    }
-
-    @Override
-    public GoalKey<Mob> getKey() {
-        return key;
     }
 
     @Override

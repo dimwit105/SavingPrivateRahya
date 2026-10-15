@@ -1,6 +1,7 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.game;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.AssaultManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.CountdownTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.NetherHeatTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.TimerTask;
@@ -40,10 +41,13 @@ public class Game
     public final int baseTime = 45*60;
     public final Location gameCenter;
 
-    private final TimerTask time = new TimerTask(this, baseTime);
+    //Managers&Tasks
     private NaturalMobManager mobs;
     private CountdownTask countdownTask;
     private NetherHeatTask heat;
+    private AssaultManager assaultManager;
+
+    private final TimerTask time = new TimerTask(this, baseTime);
     private final TitleManager titles = new TitleManager(this);
     public WorldModifier wm;
     public final World overworld;
@@ -61,6 +65,7 @@ public class Game
         this.gameCenter = Game.newGameCenter(overworld).add(0,2,0);
         wm = new WorldModifier(this);
         mobs = new NaturalMobManager(this);
+        assaultManager = new AssaultManager(this);
         nether.getWorldBorder().setCenter(GameMath.netherify(nether, gameCenter).getBlockX(), GameMath.netherify(nether, gameCenter).getBlockZ());
         nether.getWorldBorder().setSize(vipDistance*3.0F);
         nether.setDifficulty(Difficulty.HARD);
@@ -141,6 +146,7 @@ public class Game
         }, 20L);
 
         time.start();
+        assaultManager.start();
         overworld.setTime(0);
         overworld.setClearWeatherDuration(5*60*20);
     }
@@ -261,6 +267,7 @@ public class Game
     public TitleManager getTitles() {return titles;}
     public NetherHeatTask getHeat() {return heat;}
     public NaturalMobManager getMobs() {return mobs;}
+    public AssaultManager getAssaultManager() {return assaultManager;}
 
     public GameState getState() { return currentState;}
 

@@ -1,4 +1,4 @@
-package com.zezdathecrystaldragon.savingPrivateRahya.events.player;
+package com.zezdathecrystaldragon.savingPrivateRahya.events.blocks;
 
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;

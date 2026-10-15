@@ -4,8 +4,10 @@ import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.world.WorldModifier;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Random;
@@ -29,7 +31,10 @@ public class CreateOverworldPortalTask extends WorldTask {
 
             SavingPrivateRahya.runNextTick(task -> {
                 wm.buildPortalWithPlatform(overworld, loc, orientation, false);
-                var beacon = wm.buildBeaconPyramid(loc.clone().add(0,5,0), 1);
+                int players = game.getParticipants().size();
+                var beacon = wm.buildBeaconPyramid(loc.clone().add(0,5,0), wm.getOptimalBeaconTier(players));
+                beacon.getPersistentDataContainer().set(WorldModifier.SPAWN_BEACON, PersistentDataType.BOOLEAN, true);
+
                 beacon.setPrimaryEffect(PotionEffectType.HASTE);
                 beacon.setEffectRange(256);
                 beacon.update();
