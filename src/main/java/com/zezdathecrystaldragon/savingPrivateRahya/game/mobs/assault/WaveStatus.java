@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum WaveStatus
 {
-    RETREAT(120),
+    RETREAT(60),
     BUILD(30),
     SUSTAIN(-1);
 

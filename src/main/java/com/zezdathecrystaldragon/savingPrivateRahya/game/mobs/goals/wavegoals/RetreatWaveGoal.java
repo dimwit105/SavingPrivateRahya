@@ -15,11 +15,15 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowman;
+import org.bukkit.entity.memory.MemoryKey;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import javax.swing.text.html.Option;
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.logging.Level;
 
 public class RetreatWaveGoal extends AbstractWaveGoal
 {
@@ -37,6 +41,8 @@ public class RetreatWaveGoal extends AbstractWaveGoal
     public void start()
     {
         super.start();
+        assaultMob.setTarget(null);
+        assaultMob.getPathfinder().stopPathfinding();
         updateFleePath();
     }
 
@@ -49,22 +55,26 @@ public class RetreatWaveGoal extends AbstractWaveGoal
     @Override
     public void tick() {
         super.tick();
-        assaultMob.setTarget(null);
-        if(!assaultMob.getPathfinder().hasPath())
+        if(assaultMob.getTarget() != null)
+        {
+            assaultMob.setTarget(null);
             updateFleePath();
+        }
     }
 
     @Override
     public EnumSet<GoalType> getTypes() {
-        return EnumSet.of(GoalType.MOVE);
+        return EnumSet.of(GoalType.MOVE, GoalType.TARGET, GoalType.JUMP);
     }
 
     private void updateFleePath()
     {
         currentDestination = fleePathDestination();
         currentPath = getFleePath(currentDestination);
-        if(currentPath != null)
+        if(currentPath != null) {
             assaultMob.getPathfinder().moveTo(currentPath);
+            assaultMob.addPotionEffect(PotionEffectType.GLOWING.createEffect(300, 0));
+        }
     }
 
     private Pathfinder.PathResult getFleePath(Location destination)
@@ -81,7 +91,7 @@ public class RetreatWaveGoal extends AbstractWaveGoal
                  return assaultMob.getPathfinder().findPath(destination.clone().add(0, y, 0));
             }
         }
-        return null;
+        return assaultMob.getPathfinder().findPath(destination.clone());
     }
 
     private Location fleePathDestination()

@@ -15,19 +15,19 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mob;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 public class AssaultManager
 {
     public static final NamespacedKey ASSAULT_MOB = new NamespacedKey(SavingPrivateRahya.PLUGIN, "assault_mob");
-    private WaveStatus status = WaveStatus.RETREAT;
+    private WaveStatus status = WaveStatus.BUILD;
     public final Game game;
     private Random random = SavingPrivateRahya.RAND;
     public final RallyLocation rallyLocation;
@@ -37,19 +37,19 @@ public class AssaultManager
 
     private int maxSpawnsPerTick;
 
-    private int maxKillsPerSustain;
+    private int maxKillsPerSustain = 100;
     private AssaultWaveTask tickTask;
 
     public AssaultManager(Game game)
     {
         this.game = game;
-        int participants = game.getParticipants().size();
         rallyLocation = new RallyLocation(game, this);
-        maxSpawnsPerTick = Math.min(participants * 3, 12);
-        maxKillsPerSustain = (int) (30*Math.pow(participants, 1.1D));
+        maxSpawnsPerTick = 10;
     }
     public void start()
     {
+        started = true;
+        maxKillsPerSustain = (int) (100);
         tickTask = new AssaultWaveTask(this);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(tickTask, 20, 20);
     }
@@ -67,21 +67,29 @@ public class AssaultManager
         cycleTimer++;
         status = WaveStatus.getStatusFromTime(cycleTimer);
 
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault wave status: " + status.toString());
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Rally Location: " + rallyLocation.getCurrentRallyLocation());
+
         if(status != WaveStatus.RETREAT)
         {
             var validTargets = getValidTargets();
             for(int spawns = 0; spawns < maxSpawnsPerTick;)
             {
                 var randomTarget = validTargets.get(random.nextInt(validTargets.size()));
-                var mob = spawnAroundTarget(randomTarget, EntityType.PIGLIN);
+                SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Attempting spawns!");
+
+                PigZombie mob = (PigZombie) spawnAroundTarget(randomTarget, EntityType.ZOMBIFIED_PIGLIN);
                 if(mob != null)
                 {
+                    SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Mob spawned!: " + mob.getLocation());
                     spawns++;
                     mob.getPersistentDataContainer().set(ASSAULT_MOB, PersistentDataType.BOOLEAN, true);
                     var goals = Bukkit.getMobGoals();
                     goals.addGoal(mob, 0, new SustainWaveAttackGoal(this, mob));
                     goals.addGoal(mob, -1, new BuildWaveRallyGoal(this, mob));
                     goals.addGoal(mob, -2, new RetreatWaveGoal(this, mob));
+                    goals.removeGoal(mob, VanillaGoal.AVOID_ENTITY);
+
                 }
             }
         }
@@ -94,6 +102,7 @@ public class AssaultManager
     public void assaultMobKilled()
     {
         maxKillsPerSustain--;
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + maxKillsPerSustain + " kills remain!");
         if(maxKillsPerSustain <= 0)
             endSustainWave();
     }
@@ -114,6 +123,7 @@ public class AssaultManager
     private void endSustainWave()
     {
         cycleTimer = 0;
+        maxKillsPerSustain = 100;
         status = WaveStatus.RETREAT;
     }
     private Mob spawnAroundTarget(Player target, EntityType toSpawn)
@@ -129,6 +139,8 @@ public class AssaultManager
                 if(!block.isSolid())
                     continue;
                 if(block.getWorld().getBlockAt(block.getLocation().add(0,1,0)).isSolid() || block.getWorld().getBlockAt(block.getLocation().add(0,2,0)).isSolid())
+                    continue;
+                if(!attempt.getNearbyPlayers(16).isEmpty())
                     continue;
                 spawnLocation = new Location(target.getWorld(), attempt.getBlockX(), y+1, attempt.getBlockZ());
                 break;

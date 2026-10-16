@@ -27,6 +27,10 @@ public class OnEntityDeath implements Listener
         var entity = event.getEntity();
         if(entity.getPersistentDataContainer().has(AssaultManager.ASSAULT_MOB))
         {
+            if(entity.getLastDamageCause() != null && entity.getLastDamageCause().getEntity() != null)
+            {
+
+            }
             Game game = SavingPrivateRahya.PLUGIN.getGame();
             game.getAssaultManager().assaultMobKilled();
         }

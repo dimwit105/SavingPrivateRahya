@@ -70,10 +70,8 @@ public class BuildWaveRallyGoal extends AbstractWaveGoal
     {
         super.tick();
         Pathfinder pathfinder = assaultMob.getPathfinder();
-        if(pathfinder.getCurrentPath() != null && pathfinder.getCurrentPath().getFinalPoint().distanceSquared(assaultMob.getLocation()) < 25)
-        {
-            pathfinder.stopPathfinding();
-        }
+        if (pathfinder.getCurrentPath() == null)
+            pathfinder.moveTo(RallyLocation.induceRandomVariation(manager.rallyLocation.getCurrentRallyLocation()));
         nearnessCheck++;
         if(nearnessCheck > 50)
         {

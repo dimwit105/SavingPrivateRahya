@@ -4,8 +4,11 @@ import com.destroystokyo.paper.entity.ai.GoalKey;
 import com.destroystokyo.paper.entity.ai.GoalType;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.AssaultManager;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.assault.WaveStatus;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 
 import java.util.EnumSet;
 
@@ -37,6 +40,10 @@ public class SustainWaveAttackGoal extends AbstractWaveGoal
                     currentTarget = player;
                 }
             }
+            EntityTargetLivingEntityEvent event = new EntityTargetLivingEntityEvent(assaultMob, currentTarget, EntityTargetEvent.TargetReason.CUSTOM);
+            Bukkit.getPluginManager().callEvent(event);
+            if(!event.isCancelled())
+                assaultMob.setTarget(currentTarget);
 
         }
     }
