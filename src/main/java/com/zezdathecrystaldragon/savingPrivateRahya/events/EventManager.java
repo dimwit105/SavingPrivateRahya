@@ -31,5 +31,6 @@ public class EventManager
         Bukkit.getPluginManager().registerEvents(new OnEntityTarget(), spr);
         Bukkit.getPluginManager().registerEvents(new OnBeaconDeactivate(), spr);
         Bukkit.getPluginManager().registerEvents(new OnReceiveBeaconEffect(), spr);
+        Bukkit.getPluginManager().registerEvents(new OnEntityDespawn(), spr);
     }
 }

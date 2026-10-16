@@ -24,6 +24,8 @@ public class OnMobSpawn implements Listener
         if(event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
         {
             game.getMobs().handleRandomSpawns(event);
+            if(event.getEntity().getType() == EntityType.ZOMBIFIED_PIGLIN)
+                event.setCancelled(true);
         }
     }
     @EventHandler

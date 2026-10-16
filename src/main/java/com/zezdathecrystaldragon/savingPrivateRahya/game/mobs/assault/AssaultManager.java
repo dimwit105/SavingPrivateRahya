@@ -37,19 +37,25 @@ public class AssaultManager
 
     private int maxSpawnsPerTick;
 
-    private int maxKillsPerSustain = 100;
+    private int maxActiveSpawns = 100;
+    private int activeSpawns = 0;
+
+    private int maxKillsPerSustain;
+    private int killsThisSustain = 0;
     private AssaultWaveTask tickTask;
 
     public AssaultManager(Game game)
     {
         this.game = game;
         rallyLocation = new RallyLocation(game, this);
-        maxSpawnsPerTick = 10;
+
     }
     public void start()
     {
         started = true;
-        maxKillsPerSustain = (int) (100);
+        maxSpawnsPerTick = 1 + (int)GameMath.getHarmonicNumber(game.getParticipants().size());
+        maxKillsPerSustain = 30 * (int)Math.pow(game.getParticipants().size(), 1.1);
+        maxActiveSpawns = (int)Math.min(120, 0.33*maxKillsPerSustain);
         tickTask = new AssaultWaveTask(this);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(tickTask, 20, 20);
     }
@@ -70,7 +76,7 @@ public class AssaultManager
         SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault wave status: " + status.toString());
         SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Rally Location: " + rallyLocation.getCurrentRallyLocation());
 
-        if(status != WaveStatus.RETREAT)
+        if(status != WaveStatus.RETREAT && activeSpawns < maxActiveSpawns)
         {
             var validTargets = getValidTargets();
             for(int spawns = 0; spawns < maxSpawnsPerTick;)
@@ -83,6 +89,7 @@ public class AssaultManager
                 {
                     SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Mob spawned!: " + mob.getLocation());
                     spawns++;
+                    activeSpawns++;
                     mob.getPersistentDataContainer().set(ASSAULT_MOB, PersistentDataType.BOOLEAN, true);
                     var goals = Bukkit.getMobGoals();
                     goals.addGoal(mob, 0, new SustainWaveAttackGoal(this, mob));
@@ -101,10 +108,18 @@ public class AssaultManager
     }
     public void assaultMobKilled()
     {
-        maxKillsPerSustain--;
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + maxKillsPerSustain + " kills remain!");
-        if(maxKillsPerSustain <= 0)
-            endSustainWave();
+        activeSpawns--;
+        if(status != WaveStatus.RETREAT)
+        {
+            killsThisSustain++;
+            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + maxKillsPerSustain + " kills remain!");
+            if(killsThisSustain >= maxKillsPerSustain)
+                endSustainWave();
+        }
+    }
+    public void assaultMobDespawned()
+    {
+        activeSpawns--;
     }
     public ArrayList<Player> getValidTargets()
     {
@@ -122,8 +137,9 @@ public class AssaultManager
 
     private void endSustainWave()
     {
-        cycleTimer = 0;
-        maxKillsPerSustain = 100;
+        int timeMultiplier = Math.max(game.getTime().getSegmentsRemaining(), 0);
+        cycleTimer = -(WaveStatus.RETREAT.getDuration() * timeMultiplier);
+        killsThisSustain = 0;
         status = WaveStatus.RETREAT;
     }
     private Mob spawnAroundTarget(Player target, EntityType toSpawn)
