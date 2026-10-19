@@ -28,16 +28,14 @@ public class TargetGhastGoal implements Goal<Snowman> {
 
     @Override
     public boolean shouldActivate() {
-        // If we already have a valid target in range, no need to search
         if (target != null && target.isValid() &&
                 target.getLocation().distanceSquared(snowman.getLocation()) < 16384) {
             return false;
         }
 
-        // Search for the closest Ghast within 128 blocks
         target = snowman.getWorld().getEntitiesByClass(Ghast.class).stream()
                 .filter(g -> g.getLocation().distanceSquared(snowman.getLocation()) <= 16384)
-                .filter(snowman::hasLineOfSight) // Only target what we can hit
+                .filter(snowman::hasLineOfSight)
                 .min(Comparator.comparingDouble(g -> g.getLocation().distanceSquared(snowman.getLocation())))
                 .orElse(null);
 

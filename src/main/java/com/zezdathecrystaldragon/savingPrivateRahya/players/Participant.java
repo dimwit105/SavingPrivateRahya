@@ -83,6 +83,8 @@ public class Participant
     }
     public void onDeath(PlayerDeathEvent event)
     {
+        if(isEliminated())
+            return;
         if(event.getPlayer().getWorld().getEnvironment() == World.Environment.NORMAL)
         {
             respawning = true;

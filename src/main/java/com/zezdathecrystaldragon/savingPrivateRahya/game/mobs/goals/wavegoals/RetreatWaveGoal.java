@@ -73,7 +73,7 @@ public class RetreatWaveGoal extends AbstractWaveGoal
         currentPath = getFleePath(currentDestination);
         if(currentPath != null) {
             assaultMob.getPathfinder().moveTo(currentPath);
-            assaultMob.addPotionEffect(PotionEffectType.GLOWING.createEffect(300, 0));
+            //assaultMob.addPotionEffect(PotionEffectType.GLOWING.createEffect(300, 0));
         }
     }
 

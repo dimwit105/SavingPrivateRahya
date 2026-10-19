@@ -18,13 +18,13 @@ import java.util.*;
 
 public class NaturalMobManager
 {
-    public static final int DEFAULT_MOB_CAP = 100;
+    public static final int DEFAULT_MOB_CAP = 50;
     public static final NamespacedKey CUSTOM = new NamespacedKey(SavingPrivateRahya.PLUGIN, "custom");
     public static final NamespacedKey TRACKING = new NamespacedKey(SavingPrivateRahya.PLUGIN, "tracking");
     private EscalatingCapTask escalatingCapTask;
 
     public static final List<MobTier> bonusMobs = List.of(
-            new MobTier(EntityType.BREEZE, 2, List.of(MobTier.MobBehavior.of(-2, Breeze.class, breeze -> {
+            new MobTier(EntityType.BREEZE, 1, List.of(MobTier.MobBehavior.of(-2, Breeze.class, breeze -> {
                 breeze.getPersistentDataContainer().set(TRACKING, PersistentDataType.BOOLEAN, true);
             }))),
             new MobTier(EntityType.WITHER_SKELETON, 1, List.of(MobTier.MobBehavior.of(1, WitherSkeleton.class, ws -> {
@@ -86,8 +86,8 @@ public class NaturalMobManager
         }
         if(tps[0] < 17)
             capIncrease = (int) (capIncrease * 0.5D);
-
-        game.nether.setSpawnLimit(SpawnCategory.MONSTER, DEFAULT_MOB_CAP + capIncrease);
+        if(segments != 6)
+            game.nether.setSpawnLimit(SpawnCategory.MONSTER, DEFAULT_MOB_CAP + capIncrease);
 
     }
     public void resetNaturalSpawns()

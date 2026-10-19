@@ -15,6 +15,8 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,7 @@ public class Enderwolf
     {
         this.vip = vip;
         cooldownTask = new EnderwolfCooldownTask(vip, this);
-        SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(vip.getPlayer().orElseThrow(), cooldownTask, 0, 20);
+
         enderWolf = spawnWolf();
         populateAbilities(SavingPrivateRahya.FOURTH_CHANCE != null);
     }
@@ -109,9 +111,9 @@ public class Enderwolf
     public void reOwn()
     {
         if(getWolf().isEmpty())
-            return;
+            respawnWolf();
         cooldownTask = cooldownTask.copy();
-        respawnWolf();
+        //respawnWolf();
         getWolf()
                 .flatMap(wolf -> vip.getPlayer().map(player -> List.of(wolf, player)))
                 .ifPresent(pair -> {
@@ -143,6 +145,7 @@ public class Enderwolf
         wolf.getAttribute(Attribute.MAX_HEALTH).addModifier(new AttributeModifier(SavingPrivateRahya.PLUGIN.VIP_MOB, 20D, AttributeModifier.Operation.ADD_NUMBER));
         wolf.getAttribute(Attribute.ARMOR).setBaseValue(10D);
         wolf.getAttribute(Attribute.BURNING_TIME).addModifier(new AttributeModifier(SavingPrivateRahya.PLUGIN.VIP_MOB, -1D, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
+        wolf.addPotionEffect(PotionEffectType.REGENERATION.createEffect(PotionEffect.INFINITE_DURATION, 0));
         wolf.setOwner(player);
         wolf.setCollarColor(DyeColor.YELLOW);
         wolf.setVariant(Wolf.Variant.PALE);
@@ -166,5 +169,6 @@ public class Enderwolf
             ability.remove();
         }
         getWolf().ifPresent(Entity::remove);
+        enderWolf = null;
     }
 }

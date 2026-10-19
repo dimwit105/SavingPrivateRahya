@@ -23,9 +23,11 @@ public class OnMobSpawn implements Listener
         Game game = SavingPrivateRahya.PLUGIN.getGame();
         if(event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
         {
-            game.getMobs().handleRandomSpawns(event);
             if(event.getEntity().getType() == EntityType.ZOMBIFIED_PIGLIN)
                 event.setCancelled(true);
+            else
+                game.getMobs().handleRandomSpawns(event);
+
         }
     }
     @EventHandler
@@ -41,7 +43,7 @@ public class OnMobSpawn implements Listener
             sm.getAttribute(Attribute.MAX_HEALTH).setBaseValue(40D);
             sm.setHealth(sm.getAttribute(Attribute.MAX_HEALTH).getValue());
             goals.removeGoal(sm, VanillaGoal.MELEE_ATTACK);
-            goals.addGoal(sm, 1, new TargetGhastGoal(SavingPrivateRahya.PLUGIN, sm));
+            goals.addGoal(sm, 2, new TargetGhastGoal(SavingPrivateRahya.PLUGIN, sm));
             sm.getPersistentDataContainer().set(SavingPrivateRahya.PLUGIN.VIP_MOB, PersistentDataType.BOOLEAN, true);
         }
         if(event.getEntity() instanceof IronGolem gm)

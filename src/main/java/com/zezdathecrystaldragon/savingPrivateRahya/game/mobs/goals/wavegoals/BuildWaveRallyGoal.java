@@ -12,9 +12,11 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.EnumSet;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class BuildWaveRallyGoal extends AbstractWaveGoal
 {
@@ -52,9 +54,7 @@ public class BuildWaveRallyGoal extends AbstractWaveGoal
     public void start()
     {
         super.start();
-        Pathfinder pathfinder = assaultMob.getPathfinder();
-        pathfinder.moveTo(RallyLocation.induceRandomVariation(manager.rallyLocation.getCurrentRallyLocation()));
-        manager.rallyLocation.listenToRallyLocationChanges(rallyUpdater);
+        updatePathing(RallyLocation.induceRandomVariation(manager.rallyLocation.getCurrentRallyLocation()));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class BuildWaveRallyGoal extends AbstractWaveGoal
         super.tick();
         Pathfinder pathfinder = assaultMob.getPathfinder();
         if (pathfinder.getCurrentPath() == null)
-            pathfinder.moveTo(RallyLocation.induceRandomVariation(manager.rallyLocation.getCurrentRallyLocation()));
+            updatePathing(RallyLocation.induceRandomVariation(manager.rallyLocation.getCurrentRallyLocation()));
         nearnessCheck++;
         if(nearnessCheck > 50)
         {
@@ -83,14 +83,23 @@ public class BuildWaveRallyGoal extends AbstractWaveGoal
         }
     }
 
+    private void updatePathing(Location newLoc)
+    {
+        Pathfinder pathfinder = assaultMob.getPathfinder();
+        pathfinder.stopPathfinding();
+        boolean success = pathfinder.moveTo(RallyLocation.induceRandomVariation(newLoc));
+        //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO,  "Rally pathing result: " + String.valueOf(success));
+        //if(success)
+            //assaultMob.addPotionEffect(PotionEffectType.GLOWING.createEffect(300, 0));
+    }
+
     @Override
     public EnumSet<GoalType> getTypes() {
-        return EnumSet.of(GoalType.MOVE);
+        return EnumSet.of(GoalType.MOVE, GoalType.TARGET);
     }
 
     private void onRallyLocationChanged(Location newLoc)
     {
-        Pathfinder pathfinder = assaultMob.getPathfinder();
-        pathfinder.moveTo(RallyLocation.induceRandomVariation(newLoc));
+        updatePathing(newLoc);
     }
 }

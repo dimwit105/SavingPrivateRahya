@@ -33,11 +33,11 @@ public class AssaultManager
     public final RallyLocation rallyLocation;
 
     private boolean started = false;
-    private int cycleTimer = WaveStatus.RETREAT.getDuration();
+    private int cycleTimer;
 
     private int maxSpawnsPerTick;
 
-    private int maxActiveSpawns = 100;
+    private int maxActiveSpawns;
     private int activeSpawns = 0;
 
     private int maxKillsPerSustain;
@@ -52,10 +52,11 @@ public class AssaultManager
     }
     public void start()
     {
+        cycleTimer = (game.baseTime / -2) + WaveStatus.RETREAT.getDuration();
         started = true;
         maxSpawnsPerTick = 1 + (int)GameMath.getHarmonicNumber(game.getParticipants().size());
-        maxKillsPerSustain = 30 * (int)Math.pow(game.getParticipants().size(), 1.1);
-        maxActiveSpawns = (int)Math.min(120, 0.33*maxKillsPerSustain);
+        maxKillsPerSustain = (int) (8 * Math.pow(game.getParticipants().size(), 1.1));
+        maxActiveSpawns = 5 + game.getParticipants().size();
         tickTask = new AssaultWaveTask(this);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(tickTask, 20, 20);
     }
@@ -73,8 +74,8 @@ public class AssaultManager
         cycleTimer++;
         status = WaveStatus.getStatusFromTime(cycleTimer);
 
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault wave status: " + status.toString());
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Rally Location: " + rallyLocation.getCurrentRallyLocation());
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault wave status: " + status.toString() + " Cycle timer: " + cycleTimer);
+        //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Rally Location: " + rallyLocation.getCurrentRallyLocation());
 
         if(status != WaveStatus.RETREAT && activeSpawns < maxActiveSpawns)
         {
@@ -87,9 +88,9 @@ public class AssaultManager
                 PigZombie mob = (PigZombie) spawnAroundTarget(randomTarget, EntityType.ZOMBIFIED_PIGLIN);
                 if(mob != null)
                 {
-                    SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Mob spawned!: " + mob.getLocation());
                     spawns++;
                     activeSpawns++;
+                    SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Mob spawned! " + (maxActiveSpawns - activeSpawns) + " spawn slots remaining!");
                     mob.getPersistentDataContainer().set(ASSAULT_MOB, PersistentDataType.BOOLEAN, true);
                     var goals = Bukkit.getMobGoals();
                     goals.addGoal(mob, 0, new SustainWaveAttackGoal(this, mob));
@@ -108,16 +109,15 @@ public class AssaultManager
     }
     public void assaultMobKilled()
     {
-        activeSpawns--;
         if(status != WaveStatus.RETREAT)
         {
             killsThisSustain++;
-            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + maxKillsPerSustain + " kills remain!");
+            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + (maxKillsPerSustain - killsThisSustain) + " kills remain!");
             if(killsThisSustain >= maxKillsPerSustain)
                 endSustainWave();
         }
     }
-    public void assaultMobDespawned()
+    public void assaultMobRemoved()
     {
         activeSpawns--;
     }
