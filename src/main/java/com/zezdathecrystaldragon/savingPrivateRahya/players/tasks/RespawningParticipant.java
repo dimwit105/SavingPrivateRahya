@@ -1,5 +1,6 @@
 package com.zezdathecrystaldragon.savingPrivateRahya.players.tasks;
 
+import com.zezdathecrystaldragon.savingPrivateRahya.game.GameState;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.util.ParticipantTask;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.ItemUtil;
@@ -27,6 +28,11 @@ public class RespawningParticipant extends ParticipantTask
     public void run()
     {
         sendRespawnMessage();
+        if(participant.getGame().getState() != GameState.IN_PROGRESS)
+        {
+            cancel();
+            return;
+        }
         if(respawnTime == 0)
         {
             player.setGameMode(GameMode.SURVIVAL);

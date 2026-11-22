@@ -182,7 +182,7 @@ public class Game
                 p.eliminate();
                 long delay = SavingPrivateRahya.RAND.nextLong(100) + 50;
                 SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runLater(() -> {
-                    if(player == null || player.isDead())
+                    if(player == null || player.isDead() || player.getGameMode() == GameMode.SPECTATOR)
                         return;
                     player.setHealth(0.001953125D);
                     player.getWorld().createExplosion(player.getLocation(), 9f);

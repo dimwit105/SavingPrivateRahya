@@ -10,18 +10,16 @@ import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.goals.wavegoals.Re
 import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.goals.wavegoals.SustainWaveAttackGoal;
 import com.zezdathecrystaldragon.savingPrivateRahya.players.Participant;
 import com.zezdathecrystaldragon.savingPrivateRahya.util.GameMath;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public class AssaultManager
@@ -36,12 +34,11 @@ public class AssaultManager
     private int cycleTimer;
 
     private int maxSpawnsPerTick;
-
     private int maxActiveSpawns;
     private int activeSpawns = 0;
 
-    private int maxKillsPerSustain;
-    private int killsThisSustain = 0;
+    private int maxSustainScore;
+    private int sustainScore = 0;
     private AssaultWaveTask tickTask;
 
     public AssaultManager(Game game)
@@ -52,11 +49,11 @@ public class AssaultManager
     }
     public void start()
     {
-        cycleTimer = (game.baseTime / -2) + WaveStatus.RETREAT.getDuration();
+        cycleTimer = (game.baseTime / -4) + WaveStatus.RETREAT.getDuration();
         started = true;
         maxSpawnsPerTick = 1 + (int)GameMath.getHarmonicNumber(game.getParticipants().size());
-        maxKillsPerSustain = (int) (8 * Math.pow(game.getParticipants().size(), 1.1));
-        maxActiveSpawns = 5 + game.getParticipants().size();
+        maxSustainScore = 60 + (int) (20 * Math.pow(game.getParticipants().size(), 1.1));
+        maxActiveSpawns = 8 + game.getParticipants().size();
         tickTask = new AssaultWaveTask(this);
         SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runTimer(tickTask, 20, 20);
     }
@@ -74,16 +71,23 @@ public class AssaultManager
         cycleTimer++;
         status = WaveStatus.getStatusFromTime(cycleTimer);
 
-        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault wave status: " + status.toString() + " Cycle timer: " + cycleTimer);
+        //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault wave status: " + status.toString() + " Cycle timer: " + cycleTimer);
         //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Rally Location: " + rallyLocation.getCurrentRallyLocation());
 
-        if(status != WaveStatus.RETREAT && activeSpawns < maxActiveSpawns)
+        if(status == WaveStatus.SUSTAIN)
         {
-            var validTargets = getValidTargets();
+            sustainScore++;
+        }
+        var validTargets = getValidTargets();
+        var segments = game.getTime().getSegmentsRemaining();
+        double damageNerf = (double) segments / -6;
+
+        if(status != WaveStatus.RETREAT && activeSpawns < maxActiveSpawns && !validTargets.isEmpty())
+        {
             for(int spawns = 0; spawns < maxSpawnsPerTick;)
             {
                 var randomTarget = validTargets.get(random.nextInt(validTargets.size()));
-                SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Attempting spawns!");
+                //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Attempting spawns!");
 
                 PigZombie mob = (PigZombie) spawnAroundTarget(randomTarget, EntityType.ZOMBIFIED_PIGLIN);
                 if(mob != null)
@@ -93,6 +97,8 @@ public class AssaultManager
                     SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Mob spawned! " + (maxActiveSpawns - activeSpawns) + " spawn slots remaining!");
                     mob.getPersistentDataContainer().set(ASSAULT_MOB, PersistentDataType.BOOLEAN, true);
                     var goals = Bukkit.getMobGoals();
+                    mob.getEquipment().setItemInMainHand(ItemStack.of(Material.AIR));
+                    mob.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(new AttributeModifier(new NamespacedKey(SavingPrivateRahya.PLUGIN, "pigmen_nerf"), damageNerf, AttributeModifier.Operation.MULTIPLY_SCALAR_1));
                     goals.addGoal(mob, 0, new SustainWaveAttackGoal(this, mob));
                     goals.addGoal(mob, -1, new BuildWaveRallyGoal(this, mob));
                     goals.addGoal(mob, -2, new RetreatWaveGoal(this, mob));
@@ -101,6 +107,8 @@ public class AssaultManager
                 }
             }
         }
+        if(sustainScore > maxSustainScore)
+            endSustainWave();
     }
 
     public WaveStatus getStatus()
@@ -111,9 +119,9 @@ public class AssaultManager
     {
         if(status != WaveStatus.RETREAT)
         {
-            killsThisSustain++;
-            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + (maxKillsPerSustain - killsThisSustain) + " kills remain!");
-            if(killsThisSustain >= maxKillsPerSustain)
+            sustainScore += (int)Math.max(1, maxSustainScore*0.1F);
+            //SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Assault mob killed! " + (maxSustainScore - sustainScore) + " sustain score remain!");
+            if(sustainScore >= maxSustainScore)
                 endSustainWave();
         }
     }
@@ -139,7 +147,7 @@ public class AssaultManager
     {
         int timeMultiplier = Math.max(game.getTime().getSegmentsRemaining(), 0);
         cycleTimer = -(WaveStatus.RETREAT.getDuration() * timeMultiplier);
-        killsThisSustain = 0;
+        sustainScore = 0;
         status = WaveStatus.RETREAT;
     }
     private Mob spawnAroundTarget(Player target, EntityType toSpawn)

@@ -4,6 +4,8 @@ import com.destroystokyo.paper.entity.ai.VanillaGoal;
 import com.zezdathecrystaldragon.savingPrivateRahya.SavingPrivateRahya;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.Game;
 import com.zezdathecrystaldragon.savingPrivateRahya.game.mobs.goals.TargetGhastGoal;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.FuckGhastsTasks;
+import com.zezdathecrystaldragon.savingPrivateRahya.game.tasks.mobs.HeatSeekingFireball;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -14,8 +16,11 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.Random;
+
 public class OnMobSpawn implements Listener
 {
+    Random rand = new Random();
     @EventHandler
     public void onEntitySpawn(CreatureSpawnEvent event)
     {
@@ -24,7 +29,13 @@ public class OnMobSpawn implements Listener
         if(event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL)
         {
             if(event.getEntity().getType() == EntityType.ZOMBIFIED_PIGLIN)
+            {
                 event.setCancelled(true);
+            }
+            else if(rand.nextInt(7 + game.getTime().getSegmentsRemaining()) != 0)
+            {
+                event.setCancelled(true);
+            }
             else
                 game.getMobs().handleRandomSpawns(event);
 
@@ -43,7 +54,7 @@ public class OnMobSpawn implements Listener
             sm.getAttribute(Attribute.MAX_HEALTH).setBaseValue(40D);
             sm.setHealth(sm.getAttribute(Attribute.MAX_HEALTH).getValue());
             goals.removeGoal(sm, VanillaGoal.MELEE_ATTACK);
-            goals.addGoal(sm, 2, new TargetGhastGoal(SavingPrivateRahya.PLUGIN, sm));
+            SavingPrivateRahya.PLUGIN.getFoliaLib().getScheduler().runAtEntityTimer(sm, new FuckGhastsTasks(sm), 0, 8);
             sm.getPersistentDataContainer().set(SavingPrivateRahya.PLUGIN.VIP_MOB, PersistentDataType.BOOLEAN, true);
         }
         if(event.getEntity() instanceof IronGolem gm)

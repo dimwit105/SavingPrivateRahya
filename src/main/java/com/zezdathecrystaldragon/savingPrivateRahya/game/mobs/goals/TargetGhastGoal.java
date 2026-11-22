@@ -7,10 +7,12 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Snowman;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.logging.Level;
 
 public class TargetGhastGoal implements Goal<Snowman> {
 
@@ -38,14 +40,25 @@ public class TargetGhastGoal implements Goal<Snowman> {
                 .filter(snowman::hasLineOfSight)
                 .min(Comparator.comparingDouble(g -> g.getLocation().distanceSquared(snowman.getLocation())))
                 .orElse(null);
-
-        return target != null;
+        if(target != null)
+        {
+            plugin.getLogger().log(Level.INFO, "Snow golem has a target, should be activating!");
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean shouldStayActive() {
-        return target != null && target.isValid() &&
-                target.getLocation().distanceSquared(snowman.getLocation()) <= 16384;
+        var shouldBeActive = target != null && target.isValid() &&
+                target.getLocation().distanceSquared(snowman.getLocation()) <= 16384 &&
+                snowman.hasLineOfSight(target);
+        if(shouldBeActive)
+        {
+            plugin.getLogger().log(Level.INFO, "Staying active!");
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -61,10 +74,10 @@ public class TargetGhastGoal implements Goal<Snowman> {
 
     @Override
     public void tick() {
-        // Ensure the target remains set in the entity's brain
         if (target != null) {
             snowman.setTarget(target);
         }
+        plugin.getLogger().log(Level.INFO, "Should be targetting " + target.getType());
     }
 
     @Override

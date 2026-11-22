@@ -20,7 +20,8 @@ public class OnBlockBreak implements Listener
             return;
         if(event.getBlock().getWorld().getEnvironment() != World.Environment.NETHER)
             return;
-
+        if(!event.getBlock().isSolid())
+            return;
         game.getHeat().incrementHeat();
         int heat = game.getHeat().getHeatValue();
         double ratio = (double) heat / game.getHeat().heatEffectsStarting;

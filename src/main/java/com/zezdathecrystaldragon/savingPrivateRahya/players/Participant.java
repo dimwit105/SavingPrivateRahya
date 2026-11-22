@@ -23,6 +23,7 @@ import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class Participant
 {
@@ -32,7 +33,7 @@ public class Participant
     protected SpawnLocation spawnLocation;
     boolean eliminated = false;
     Location eliminationLocation;
-    boolean respawning = false;
+    private boolean respawning = false;
     private boolean restored = false;
 
     public VeryImportantParticipant toVIP()
@@ -83,10 +84,12 @@ public class Participant
     }
     public void onDeath(PlayerDeathEvent event)
     {
-        if(isEliminated())
+        if(isEliminated() || game.isPreGame())
             return;
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, "Player died in "  + event.getPlayer().getWorld().getEnvironment());
         if(event.getPlayer().getWorld().getEnvironment() == World.Environment.NORMAL)
         {
+            SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, event.getPlayer().getName() + " has respawning set to true!");
             respawning = true;
         }
         else
@@ -94,6 +97,7 @@ public class Participant
     }
     public void onRespawn(PlayerRespawnEvent event)
     {
+        SavingPrivateRahya.PLUGIN.getLogger().log(Level.INFO, event.getPlayer().getName() + " has respawned with respawning field of " + respawning);
         if(getPlayer().isEmpty())
             return;
         var player = getPlayer().get();
@@ -102,6 +106,11 @@ public class Participant
             event.setRespawnLocation(game.gameCenter);
             return;
         }
+        if(eliminated)
+        {
+            player.setGameMode(GameMode.SPECTATOR);
+            event.setRespawnLocation(eliminationLocation);
+        }
         if(respawning)
         {
             respawning = false;
@@ -109,11 +118,7 @@ public class Participant
             event.setRespawnLocation(game.getVip().get().getPlayer().get().getLocation());
             addTask(new RespawningParticipant(this));
         }
-        if(eliminated)
-        {
-            player.setGameMode(GameMode.SPECTATOR);
-            event.setRespawnLocation(eliminationLocation);
-        }
+
     }
     public void onDisconnect(PlayerQuitEvent event)
     {

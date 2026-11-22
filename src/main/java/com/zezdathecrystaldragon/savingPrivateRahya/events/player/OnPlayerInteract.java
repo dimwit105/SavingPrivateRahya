@@ -22,16 +22,16 @@ import java.util.List;
 public class OnPlayerInteract implements Listener
 {
     ArrayList<PotionEffect> buffs = new ArrayList<>(List.of(
-            new PotionEffect(PotionEffectType.REGENERATION, 55, 0, true,false),
+            new PotionEffect(PotionEffectType.REGENERATION, 80, 0, true,false),
             new PotionEffect(PotionEffectType.ABSORPTION, 300, 0, true, false),
-            new PotionEffect(PotionEffectType.SLOW_FALLING, 100, 0, true, false),
-            new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 100, 0, true,true)
+            new PotionEffect(PotionEffectType.SLOW_FALLING, 300, 0, true, false),
+            new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 300, 0, true,true)
     ));
     ArrayList<PotionEffect> debuffs = new ArrayList<>(List.of(
-            new PotionEffect(PotionEffectType.WITHER, 200, 0, true,false),
-            new PotionEffect(PotionEffectType.WEAKNESS, 300, 0, true, false),
-            new PotionEffect(PotionEffectType.LEVITATION, 100, 0, true, false),
-            new PotionEffect(PotionEffectType.SLOWNESS, 300, 0, true,true)
+            new PotionEffect(PotionEffectType.WITHER, PotionEffect.INFINITE_DURATION, 0, true,false),
+            new PotionEffect(PotionEffectType.WEAKNESS, PotionEffect.INFINITE_DURATION, 0, true, false),
+            new PotionEffect(PotionEffectType.LEVITATION, 60*20, 0, true, false),
+            new PotionEffect(PotionEffectType.SLOWNESS, PotionEffect.INFINITE_DURATION, 0, true,true)
     ));
 
     @EventHandler
